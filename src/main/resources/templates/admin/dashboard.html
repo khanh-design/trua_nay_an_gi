@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap & Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Sidebar Styles -->
+    <th:block th:replace="admin/fragments/navbar :: sidebar-styles"></th:block>
+
+    <style>
+        body {
+            background-color: var(--background-color);
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+        #content {
+            flex-grow: 1;
+            padding: 2rem;
+            max-width: calc(100% - var(--sidebar-width));
+            transition: all 0.3s;
+        }
+        @media (max-width: 992px) {
+            #sidebar {
+                margin-left: -var(--sidebar-width);
+            }
+            #sidebar.active {
+                margin-left: 0;
+            }
+            #content {
+                max-width: 100%;
+            }
+        }
+        .card {
+            border-radius: 0.75rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- Sidebar -->
+    <div th:replace="admin/fragments/navbar :: sidebar(${activePage})"></div>
+
+    <!-- Page Content -->
+    <div id="content">
+        <main>
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 fw-bold mb-0">Dashboard</h1>
+                    <p class="text-muted mb-0">Tổng quan hệ thống và các số liệu quan trọng.</p>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-light d-flex align-items-center rounded-pill shadow-sm" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-2"></i>
+                        <span class="d-none d-sm-inline">Admin</span>
+                        <i class="fas fa-chevron-down ms-2 small"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                        <li><a class="dropdown-item" th:href="@{/logout}">
+                            <i class="fas fa-sign-out-alt fa-fw me-2 text-muted"></i>Đăng xuất
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Cột trái -->
+                <div class="col-lg-8">
+                    <!-- Thống kê -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-0 pt-3">
+                            <h5 class="card-title fw-bold mb-0">Thống kê chung</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div><i class="fas fa-store text-primary me-3 fa-lg"></i> Số lượng Chủ nhà hàng</div>
+                                    <span class="badge bg-primary rounded-pill fs-6" th:text="${ownerCount}">0</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div><i class="fas fa-users text-success me-3 fa-lg"></i> Số lượng Khách hàng</div>
+                                    <span class="badge bg-success rounded-pill fs-6" th:text="${customerCount}">0</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div><i class="fas fa-receipt text-info me-3 fa-lg"></i> Tổng số Đơn hàng</div>
+                                    <span class="badge bg-info rounded-pill fs-6" th:text="${orderCount}">0</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Món ăn nổi bật -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 pt-3">
+                            <h5 class="card-title fw-bold mb-0">⭐ Món Ăn Nổi Bật</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex align-items-center p-3" th:each="dish : ${topDishes}">
+                                    <img th:src="@{'/images/dish/' + ${dish.getPictureUrl()}}" alt="Dish Image" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.5rem;" class="me-3">
+                                    <div class="me-auto">
+                                        <h6 class="mb-0 fw-bold" th:text="${dish.name}">Tên món ăn</h6>
+                                        <small class="text-muted" th:text="${dish.restaurant.name}">Tên nhà hàng</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="fw-bold text-danger d-block" th:text="${#numbers.formatDecimal(dish.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">100.000 VNĐ</span>
+                                        <span class="badge bg-danger" th:if="${dish.discount > 0}" th:text="'-' + ${dish.discount} + '%'">-15%</span>
+                                    </div>
+                                </li>
+                                <li class="list-group-item" th:if="${topDishes == null or topDishes.isEmpty()}">
+                                    <p class="text-center text-muted my-2">Không có món ăn nào để hiển thị.</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 pt-3">
+                            <h5 class="card-title fw-bold mb-0">Doanh thu 6 tháng gần nhất</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+    const chartLabels = /*[[${chartLabels}]]*/ ['Thg 1', 'Thg 2', 'Thg 3', 'Thg 4', 'Thg 5', 'Thg 6'];
+    const chartData = /*[[${chartData}]]*/ [120, 190, 300, 500, 200, 350];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'bar',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Doanh thu (triệu VNĐ)',
+                    data: chartData,
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: { duration: 800, easing: 'easeOutQuart' },
+                scales: { y: { beginAtZero: true } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    });
+</script>
+</body>
+</html>

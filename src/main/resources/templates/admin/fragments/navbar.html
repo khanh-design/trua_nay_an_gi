@@ -1,0 +1,139 @@
+<!-- CSS fragment -->
+<th:block th:fragment="sidebar-styles">
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-bg: #1e293b;
+            --sidebar-text: #cbd5e1;
+            --sidebar-active-bg: #334155;
+            --sidebar-hover-bg: #293548;
+            --primary-color: #3b82f6;
+        }
+
+        /* Sidebar Container */
+        #sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            /* Đảm bảo full chiều cao màn hình */
+            transition: all 0.3s ease;
+        }
+
+        /* Header */
+        .sidebar-header {
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--sidebar-active-bg);
+        }
+
+        .sidebar-header .navbar-brand {
+            color: white;
+            font-weight: bold;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        /* Nav links */
+        .sidebar-nav {
+            flex-grow: 1;
+            /* Đẩy footer xuống cuối */
+        }
+
+        .sidebar-nav .nav-link {
+            padding: 0.85rem 1.5rem;
+            color: var(--sidebar-text);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-left: 4px solid transparent;
+            transition: background-color 0.2s, color 0.2s, border-left 0.2s;
+        }
+
+        .sidebar-nav .nav-link:hover {
+            background-color: var(--sidebar-hover-bg);
+            color: white;
+        }
+
+        .sidebar-nav .nav-link.active {
+            background-color: var(--sidebar-active-bg);
+            color: white;
+            border-left-color: var(--primary-color);
+        }
+
+        /* Footer */
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--sidebar-active-bg);
+            text-align: center;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+    </style>
+</th:block>
+
+<!-- Sidebar HTML fragment -->
+<nav id="sidebar" th:fragment="sidebar(activePage)">
+    <!-- Header -->
+    <div class="sidebar-header">
+        <a class="navbar-brand" th:href="@{/admin/dashboard}">
+            <i class="fas fa-user-shield"></i> Admin
+        </a>
+    </div>
+
+    <!-- Navigation -->
+    <ul class="nav flex-column sidebar-nav mt-3">
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activePage == 'dashboard'} ? 'active'" th:href="@{/admin/dashboard}">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+        </li>
+         <li class="nav-item">
+            <a class="nav-link" th:classappend="${activePage == 'list'} ? 'active'" th:href="@{/admin/users/list}">
+                <i class="fas fa-user-shield"></i>
+                Quản lý tài khoản 
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activePage == 'list'} ? 'active'" th:href="@{/admin/list}">
+                <i class="fas fa-store"></i>
+                Quản lý Chủ quán
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activePage == 'restaurant'} ? 'active'" th:href="@{/admin/dish/list}">
+                <i class="fas fa-utensils"></i>
+                Quản lý món ăn
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activePage == 'category'} ? 'active'" th:href="@{/admin/orders/list}">
+                <i class="fas fa-th-list"></i>
+                 Quản lý Đơn hàng
+            </a>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activePage == 'shipper'} ? 'active'" th:href="@{/admin/shippers}">
+                <i class="fas fa-truck-fast"></i>
+                Quản lý Vận chuyển
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activePage == 'requests'} ? 'active'" th:href="@{/admin/requests/pending}">
+                <i class="fas fa-wallet"></i>
+                Yêu cầu rút tiền
+            </a>
+    </ul>
+
+    <!-- Footer -->
+    <div class="sidebar-footer mt-auto">
+        &copy; 2025 Admin Panel
+    </div>
+</nav>

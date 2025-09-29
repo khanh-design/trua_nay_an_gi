@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký Nhà hàng</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css"
+        rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .register-card {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .map-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .map-left {
+            flex: 1 1 250px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #map {
+            flex: 2 1 350px;
+            height: 300px;
+            border-radius: 10px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="register-card">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                        <h2 class="fw-bold">Đăng ký Nhà hàng</h2>
+                        <p class="text-muted">Tạo tài khoản nhà hàng của bạn</p>
+                    </div>
+
+                    <form th:action="@{/restaurants/signup}" th:object="${restaurant}" method="post">
+                        <!-- Thông tin cơ bản -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-semibold">Tên nhà hàng</label>
+                            <input id="name" class="form-control" th:field="*{name}" required>
+                            <div class="error-message" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-semibold">Email</label>
+                            <input id="email" type="email" class="form-control" th:field="*{email}" required>
+                            <div class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label fw-semibold">Mật khẩu</label>
+                            <input id="password" type="password" class="form-control" th:field="*{password}" required>
+                            <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label fw-semibold">Xác nhận mật khẩu</label>
+                            <input id="confirmPassword" type="password" class="form-control"
+                                th:field="*{confirmPassword}" required>
+                            <div class="error-message" th:if="${#fields.hasErrors('confirmPassword')}"
+                                th:errors="*{confirmPassword}"></div>
+                        </div>
+
+                        <!-- Địa chỉ + Map -->
+                        <div class="map-section mb-3">
+                            <div class="map-left">
+                                <label for="address" class="form-label fw-semibold">Địa chỉ</label>
+                                <input id="address" class="form-control mb-3" th:field="*{address}"
+                                    placeholder="Chọn hoặc tìm trên bản đồ" required>
+                                <div class="error-message" th:if="${#fields.hasErrors('address')}"
+                                    th:errors="*{address}"></div>
+                                <div id="geocoder" class="mb-2"></div>
+
+                                <!-- Hidden fields for coordinates -->
+                                <input type="hidden" id="latitude" th:field="*{rlatitude}">
+                                <input type="hidden" id="longitude" th:field="*{rlongitude}">
+                            </div>
+
+                            <div id="map"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label fw-semibold">Số điện thoại</label>
+                            <input id="phone" class="form-control" th:field="*{phone}">
+                            <div class="error-message" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-semibold">Mô tả</label>
+                            <textarea id="description" class="form-control" rows="3"
+                                th:field="*{description}"></textarea>
+                            <div class="error-message" th:if="${#fields.hasErrors('description')}"
+                                th:errors="*{description}"></div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Đăng ký Nhà hàng</button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3 text-muted">
+                        <small>Sau khi đăng ký, admin sẽ xem xét và phê duyệt.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <script
+        src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        mapboxgl.accessToken = '[[${mapboxApiKey}]]';
+
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [105.854444, 21.029449], // Hà Nội
+            zoom: 12
+        });
+
+        const marker = new mapboxgl.Marker({ draggable: true }).setLngLat([105.854444, 21.029449]).addTo(map);
+
+        const geocoder = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl,
+            placeholder: 'Tìm kiếm địa chỉ...',
+            marker: false
+        });
+        document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+
+        function updateHidden(lng, lat) {
+            document.getElementById('longitude').value = lng;
+            document.getElementById('latitude').value = lat;
+        }
+
+        function updateAddress(lng, lat) {
+            fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.features.length > 0) {
+                        document.getElementById('address').value = data.features[0].place_name;
+                    }
+                });
+            updateHidden(lng, lat);
+        }
+
+        // Click trên bản đồ
+        map.on('click', e => {
+            const { lng, lat } = e.lngLat;
+            marker.setLngLat([lng, lat]);
+            updateAddress(lng, lat);
+        });
+
+        // Kéo marker
+        marker.on('dragend', () => {
+            const lngLat = marker.getLngLat();
+            updateAddress(lngLat.lng, lngLat.lat);
+        });
+
+        // Chọn từ geocoder
+        geocoder.on('result', e => {
+            const [lng, lat] = e.result.center;
+            marker.setLngLat([lng, lat]);
+            map.flyTo({ center: [lng, lat], zoom: 15 });
+            document.getElementById('address').value = e.result.place_name;
+            updateHidden(lng, lat);
+        });
+        /*]]>*/
+    </script>
+</body>
+
+</html>
