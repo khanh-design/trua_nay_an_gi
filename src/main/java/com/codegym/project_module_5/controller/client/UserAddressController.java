@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/addresses")
+@RequestMapping("/user/addresses")
 @RequiredArgsConstructor
 public class UserAddressController {
 
@@ -52,10 +52,10 @@ public class UserAddressController {
     @GetMapping("/delete/{id}")
     public String deleteAddress(@PathVariable Long id) {
         userService.deleteAddress(id);
-        return "redirect:/addresses";
+        return "redirect:/user/addresses";
     }
 
-    @GetMapping("/new")
+    @GetMapping({"/new", "/add"})
     public String showAddAddressForm(Model model) {
         model.addAttribute("addressForm", new UserAddressRequest());
         model.addAttribute("mapboxApiKey", mapboxApiKey); // Lấy từ file cấu hình
@@ -68,7 +68,7 @@ public class UserAddressController {
         User currentUser = userService.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         userService.adddAdress(currentUser.getId(), addressForm);
-        return "redirect:/addresses";
+        return "redirect:/user/addresses";
     }
 
     @GetMapping("/edit/{id}")
@@ -84,14 +84,14 @@ public class UserAddressController {
     @PostMapping("/update/{id}")
     public String updateAddress(@PathVariable Long id, @ModelAttribute UserAddressRequest addressRequest) {
         userService.updateAddress(id, addressRequest);
-        return "redirect:/addresses";
+        return "redirect:/user/addresses";
 
     }
 
     @PostMapping("/set-default/{id}")
     public String setDefault(@PathVariable Long id, Principal principal) {
         userService.clearDefaultAddress(principal.getName(), id);
-        return "redirect:/addresses";
+        return "redirect:/user/addresses";
     }
 
 }
