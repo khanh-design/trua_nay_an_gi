@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Không có quyền truy cập - FoodDelivery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .error-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .error-icon {
+            font-size: 5rem;
+            color: #ff6b6b;
+            margin-bottom: 1.5rem;
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .error-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        .error-message {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-custom {
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .btn-primary-custom {
+            background: #EE4D2D;
+            color: white;
+            border: none;
+        }
+        .btn-primary-custom:hover {
+            background: #d63d1f;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(238, 77, 45, 0.3);
+        }
+        .btn-outline-custom {
+            background: white;
+            color: #EE4D2D;
+            border: 2px solid #EE4D2D;
+        }
+        .btn-outline-custom:hover {
+            background: #EE4D2D;
+            color: white;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Include navbar -->
+<div th:replace="~{user/fragments/user_navbar :: navbar}"></div>
+
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon">
+            <i class="fas fa-ban"></i>
+        </div>
+        <h1 class="error-title">Không có quyền truy cập</h1>
+        <p class="error-message" th:text="${errorMessage}">
+            Bạn không có quyền truy cập trang này.
+        </p>
+
+        <div class="error-actions">
+            <a th:if="${!isAuthenticated}"
+               th:href="@{/account/login}"
+               class="btn btn-custom btn-primary-custom">
+                <i class="fas fa-sign-in-alt"></i>
+                Đăng nhập
+            </a>
+            <a th:if="${isAuthenticated}"
+               th:href="@{/restaurants/signup}"
+               class="btn btn-custom btn-primary-custom">
+                <i class="fas fa-store"></i>
+                Đăng ký nhà hàng
+            </a>
+            <a th:href="@{/}"
+               class="btn btn-custom btn-outline-custom">
+                <i class="fas fa-home"></i>
+                Về trang chủ
+            </a>
+        </div>
+
+        <div class="mt-4">
+            <p class="text-muted small mb-0">
+                <i class="fas fa-info-circle me-1"></i>
+                Nếu bạn cần truy cập trang này, vui lòng liên hệ với quản trị viên.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
