@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+</head>
+<body>
+
+<h3>Welcome to Chatbot</h3>
+
+<form th:action="@{/chat/message}"
+      th:object="${chatRequest}"
+      method="post">
+
+    <input type="text"
+           th:field="*{request}"
+           placeholder="Enter your message"/>
+
+    <button type="submit">Send</button>
+</form>
+
+<hr>
+
+<div th:if="${response}">
+    <h4>Bot response:</h4>
+    <p th:text="${response}"></p>
+</div>
+
+</body>
+</html>
