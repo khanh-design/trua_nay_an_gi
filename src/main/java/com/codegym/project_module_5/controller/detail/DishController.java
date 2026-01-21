@@ -1,25 +1,20 @@
 package com.codegym.project_module_5.controller.detail;
 
+import com.codegym.project_module_5.model.nutrition_model.DishNutrition;
+import com.codegym.project_module_5.model.nutrition_model.Nutrition;
 import com.codegym.project_module_5.model.restaurant_model.Dish;
 import com.codegym.project_module_5.model.restaurant_model.Coupon;
 import com.codegym.project_module_5.model.restaurant_model.DishOption;
 import com.codegym.project_module_5.model.restaurant_model.Restaurant;
 import com.codegym.project_module_5.service.impl.dish_option_impl.DishOptionService;
 import com.codegym.project_module_5.service.impl.restaurant_service_impl.DishService;
+import com.codegym.project_module_5.service.nutrition_service.IDishNutritionService;
 import com.codegym.project_module_5.service.restaurant_service.IRestaurantService;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +36,9 @@ public class DishController {
     @Autowired
     private IRestaurantService restaurantService;
 
+    @Autowired
+    private IDishNutritionService dishNutritionService;
+
     @GetMapping("/{id}")
     public String showDishDetail(@PathVariable Long id, Model model) {
         
@@ -52,6 +50,8 @@ public class DishController {
             Restaurant restaurant = dish.getRestaurant();
 
             List<Coupon> coupons = restaurantService.getCouponsByRestaurantId(restaurant.getId());
+
+            List<DishNutrition> dishNutritionList = dishNutritionService.findByDishIdWithNutrition(dish.getId());
 
             List<Dish> similarDishes = dishService.findSimilarDishesByCategory(dish.getCategory().getId(), dish.getId());
 
@@ -65,6 +65,7 @@ public class DishController {
 
             model.addAttribute("dish", dish);
             model.addAttribute("dishOptions", dishOptionsList);
+            model.addAttribute("nutritions", dishNutritionList);
             model.addAttribute("restaurant", restaurant);
             model.addAttribute("coupons", coupons);
             model.addAttribute("similarDishes", similarDishes);

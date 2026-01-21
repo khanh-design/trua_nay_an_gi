@@ -4,9 +4,12 @@ package com.codegym.project_module_5.model.restaurant_model;
 
 import com.codegym.project_module_5.model.baner_model.Banner;
 
+import com.codegym.project_module_5.model.nutrition_model.DishNutrition;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,5 +43,7 @@ import lombok.*;
         private Category category;
         @OneToOne(mappedBy = "dish", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
         private Banner banner;
+        @OneToMany(mappedBy = "dish")
+        private List<DishNutrition> dishNutritionsList;
 
     }
