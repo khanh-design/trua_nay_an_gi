@@ -1,0 +1,160 @@
+@startuml
+!theme plain
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam note {
+    BackgroundColor #FFFFCC
+    BorderColor #CCCC00
+}
+
+title Đăng nhập hệ thống (Login Flow)
+
+actor User
+participant "Browser" as Browser
+participant "AccountController" as AccountCtrl <<Controller>>
+participant "UsernamePassword\nAuthenticationFilter" as AuthFilter <<Spring Security>>
+participant "DaoAuthentication\nProvider" as AuthProvider <<Spring Security>>
+participant "UserDetailsServiceImpl" as UserDetailsSvc <<Service>>
+participant "CustomAuthentication\nSuccessHandler" as SuccessHandler <<Handler>>
+participant "CartService" as CartSvc <<Service>>
+participant "BCryptPassword\nEncoder" as PasswordEncoder <<Security>>
+participant "IUserRepository" as UserRepo <<Repository>>
+participant "ICartItemRepository" as CartRepo <<Repository>>
+database "MySQL" as DB
+
+== Bước 1: Hiển thị form đăng nhập ==
+User -> Browser: 1.1 Truy cập /account/login
+Browser -> AccountCtrl: 1.2 GET /account/login
+AccountCtrl -> Browser: 1.3 return login.html
+Browser --> User: 1.4 Hiển thị form đăng nhập
+note right
+  Form gồm:
+  - username
+  - password
+  - remember-me (checkbox)
+  - Link "Quên mật khẩu?"
+  - Link "Đăng ký ngay"
+end note
+
+== Bước 2: Người dùng nhập thông tin ==
+User -> Browser: 2.1 Nhập username và password
+Browser -> User: 2.2 Hiển thị thông tin đã nhập
+
+== Bước 3: Submit form đăng nhập ==
+User -> Browser: 3.1 Click "Đăng nhập"
+Browser -> AuthFilter: 3.2 POST /account/login
+note right
+  Content-Type: application/x-www-form-urlencoded
+  Parameters: username, password, remember-me
+end note
+
+== Bước 4: Xác thực (Authentication) ==
+AuthFilter -> AuthProvider: 4.1 authenticate(authenticationToken)
+
+AuthProvider -> UserDetailsSvc: 4.2 loadUserByUsername(username)
+UserDetailsSvc -> UserRepo: 4.2.1 findByUsername(username)
+UserRepo -> DB: 4.2.2 SELECT * FROM user WHERE username=?
+DB --> UserRepo: 4.2.3 User (with roles)
+UserRepo --> UserDetailsSvc: 4.2.4 Optional<User>
+
+alt ❌ User không tồn tại
+    UserDetailsSvc --> AuthProvider: 4.2.5a UsernameNotFoundException
+    AuthProvider --> AuthFilter: 4.3a AuthenticationException
+    AuthFilter -> Browser: 4.4a redirect:/account/login?error=true
+    Browser --> User: 4.5a Hiển thị "Sai tên đăng nhập hoặc mật khẩu!"
+    note right #FFCCCC
+      Quay lại bước 2 để nhập lại
+    end note
+else ✅ User tồn tại
+    UserDetailsSvc -> UserDetailsSvc: 4.2.5b UserDetailsImpl.build(user)
+    note right
+      Chuyển đổi User → UserDetailsImpl
+      Kèm theo GrantedAuthority (roles)
+    end note
+    UserDetailsSvc --> AuthProvider: 4.2.6b UserDetails (username, password, authorities)
+    
+    AuthProvider -> PasswordEncoder: 4.3b matches(rawPassword, encodedPassword)
+    PasswordEncoder -> PasswordEncoder: 4.3b.1 BCrypt decode & compare
+    PasswordEncoder --> AuthProvider: 4.3b.2 boolean (match result)
+    
+    alt ❌ Sai mật khẩu
+        AuthProvider --> AuthFilter: 4.3b.3a BadCredentialsException
+        AuthFilter -> Browser: 4.3b.4a redirect:/account/login?error=true
+        Browser --> User: 4.3b.5a Hiển thị "Sai tên đăng nhập hoặc mật khẩu!"
+        note right #FFCCCC
+          Quay lại bước 2 để nhập lại
+        end note
+    else ✅ Đúng mật khẩu
+        AuthProvider --> AuthFilter: 4.3b.3b Authentication (authenticated)
+        note right #CCFFCC
+          Đăng nhập thành công!
+          Lưu vào SecurityContextHolder
+        end note
+    end
+end
+
+== Bước 5: Xử lý sau đăng nhập thành công ==
+AuthFilter -> SuccessHandler: 5.1 onAuthenticationSuccess(request, response, authentication)
+
+SuccessHandler -> SuccessHandler: 5.2 mergeSessionCart(request, authentication)
+note right
+  Nếu user có giỏ hàng trong session
+  (trước khi đăng nhập) → merge vào DB
+end note
+
+SuccessHandler -> CartSvc: 5.2.1 mergeSessionCartWithDbCart(sessionCart, user)
+CartSvc -> UserRepo: 5.2.2 findByUsername(username)
+UserRepo -> DB: 5.2.3 SELECT query
+DB --> UserRepo: 5.2.4 User
+UserRepo --> CartSvc: 5.2.5 User
+
+loop Mỗi item trong sessionCart
+    CartSvc -> CartRepo: 5.2.6 save(CartItem)
+    CartRepo -> DB: 5.2.7 INSERT/UPDATE query
+    DB --> CartRepo: 5.2.8 success
+    CartRepo --> CartSvc: 5.2.9 CartItem
+end
+
+SuccessHandler -> SuccessHandler: 5.3 session.removeAttribute("cart")
+
+== Bước 6: Xác định trang đích (Role-based Redirect) ==
+SuccessHandler -> SuccessHandler: 6.1 Check session.getAttribute("redirectAfterLogin")
+
+alt ✅ Có redirectAfterLogin (user bị redirect từ trang khác)
+    SuccessHandler -> SuccessHandler: 6.2a Build URL with selectedDishIds
+    SuccessHandler -> SuccessHandler: 6.3a session.removeAttribute("redirectAfterLogin")
+else ❌ Không có redirectAfterLogin
+    SuccessHandler -> SuccessHandler: 6.2b Xác định URL theo role
+    note right
+      Mặc định: /homepage
+      
+      Duyệt authorities:
+      - ADMIN → /admin/dashboard
+      - OWNER → /restaurants/dashboard
+      - CUSTOMER → /homepage (mặc định)
+    end note
+end
+
+SuccessHandler -> Browser: 6.3 sendRedirect(contextPath + redirectUrl)
+
+== Bước 7: Chuyển đến trang đích ==
+Browser --> User: 7.1 Redirect đến trang phù hợp với role
+
+alt Admin
+    Browser --> User: 7.2a Admin Dashboard
+    note right
+      Quản lý toàn hệ thống
+    end note
+else Owner
+    Browser --> User: 7.2b Restaurant Dashboard
+    note right
+      Quản lý nhà hàng
+    end note
+else Customer
+    Browser --> User: 7.2c Homepage
+    note right
+      Xem món ăn, đặt hàng
+    end note
+end
+
+@enduml
