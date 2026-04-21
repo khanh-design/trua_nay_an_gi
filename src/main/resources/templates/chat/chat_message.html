@@ -8,16 +8,31 @@
 
 <h3>Welcome to Chatbot</h3>
 
-<form th:action="@{/chat/message}"
-      th:object="${chatRequest}"
-      method="post">
+<form method="post" th:action="@{/chat/message}" th:object="${chatRequest}">
 
-    <input type="text"
-           th:field="*{request}"
-           placeholder="Enter your message"/>
+    <input type="text" th:field="*{request}" placeholder="Nhập câu hỏi..." />
 
-    <button type="submit">Send</button>
+    <select th:field="*{goal}">
+        <option value="lose_weight">Giảm cân</option>
+        <option value="gain_muscle">Tăng cơ</option>
+    </select>
+
+    <label>
+        <input type="checkbox" th:field="*{diseases}" value="diabetes">
+        Tiểu đường
+    </label>
+
+    <label>
+        <input type="checkbox" th:field="*{diseases}" value="heart">
+        Tim mạch
+    </label>
+
+    <button type="submit">Gửi</button>
 </form>
+
+<div>
+    <p><b>Bot:</b> <span th:text="${response}"></span></p>
+</div>
 
 <hr>
 
