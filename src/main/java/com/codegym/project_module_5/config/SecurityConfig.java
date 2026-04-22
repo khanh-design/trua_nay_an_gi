@@ -78,8 +78,7 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/", "/home", "/dish/**", "/restaurant_client/**").permitAll()
                         .requestMatchers("/account/**","/register","/verify-otp").permitAll()
-
-                        // *** THÊM DÒNG NÀY ĐỂ CHO PHÉP TRUY CẬP GIỎ HÀNG ***
+                        .requestMatchers("/chat/**").permitAll()
                         .requestMatchers("/cart/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")

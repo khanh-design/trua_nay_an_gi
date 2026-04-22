@@ -575,6 +575,406 @@
 
 </script>
 
+<!-- ===== CHAT BUBBLE ===== -->
+<style>
+  /* === FAB Button === */
+  #chat-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ee4d2d, #ff6633);
+    border: none;
+    box-shadow: 0 4px 20px rgba(238, 77, 45, 0.45);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  #chat-fab:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 28px rgba(238, 77, 45, 0.55);
+  }
+  #chat-fab i {
+    color: #fff;
+    font-size: 1.35rem;
+    transition: transform 0.3s ease;
+  }
+  #chat-fab.open i { transform: rotate(90deg); }
+
+  #chat-fab .fab-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    background: #fff;
+    color: #ee4d2d;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 18px; height: 18px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    animation: cb-badge-pop 0.3s ease;
+  }
+  @keyframes cb-badge-pop {
+    from { transform: scale(0); }
+    to   { transform: scale(1); }
+  }
+
+  /* === Panel === */
+  #chat-panel {
+    position: fixed;
+    bottom: 100px;
+    right: 28px;
+    z-index: 9998;
+    width: 370px;
+    max-width: calc(100vw - 40px);
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(238, 77, 45, 0.08);
+    border: 1px solid rgba(238, 77, 45, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateY(16px) scale(0.96);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), opacity 0.2s ease;
+  }
+  #chat-panel.open {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* === Header === */
+  .cb-header {
+    background: linear-gradient(135deg, #ee4d2d 0%, #ff6633 100%);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cb-header-avatar {
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .cb-header-avatar i { color: #fff; font-size: 1rem; }
+  .cb-header-info { flex: 1; }
+  .cb-header-info h2 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+  .cb-header-status {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 0.7rem; color: rgba(255,255,255,0.85);
+    margin-top: 2px;
+  }
+  .cb-status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 5px #4ade80;
+    animation: cb-pulse 2s ease-in-out infinite;
+  }
+  @keyframes cb-pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .cb-close-btn {
+    background: rgba(255,255,255,0.15);
+    border: none; cursor: pointer;
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+    color: #fff;
+  }
+  .cb-close-btn:hover { background: rgba(255,255,255,0.3); }
+  .cb-close-btn i { font-size: 0.85rem; }
+
+  /* === Chat window === */
+  #cb-window {
+    min-height: 230px;
+    max-height: 290px;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+    background: #f8f9fa;
+  }
+  #cb-window::-webkit-scrollbar { width: 4px; }
+  #cb-window::-webkit-scrollbar-track { background: transparent; }
+  #cb-window::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 4px; }
+
+  /* messages */
+  .cb-msg { display: flex; flex-direction: column; gap: 3px; animation: cb-up 0.22s ease; }
+  @keyframes cb-up { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+  .cb-msg .cb-label {
+    font-size: 0.62rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: #adb5bd;
+  }
+  .cb-msg.user .cb-label { color: #ee4d2d; text-align: right; }
+
+  .cb-msg .cb-bubble {
+    padding: 10px 14px; border-radius: 14px;
+    font-size: 0.84rem; line-height: 1.55;
+    white-space: pre-wrap; max-width: 85%;
+  }
+  .cb-msg.user { align-items: flex-end; }
+  .cb-msg.user .cb-bubble {
+    background: linear-gradient(135deg, #ee4d2d, #ff6633);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 8px rgba(238,77,45,0.25);
+  }
+  .cb-msg.bot .cb-bubble {
+    background: #fff;
+    color: #1e293b;
+    border: 1px solid #e9ecef;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  /* Typing indicator */
+  .cb-typing .cb-bubble {
+    display: flex; gap: 5px; align-items: center;
+    padding: 14px 16px;
+    background: #fff; border: 1px solid #e9ecef;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .cb-typing .cb-bubble span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #ee4d2d;
+    animation: cb-blink 1.2s ease-in-out infinite;
+  }
+  .cb-typing .cb-bubble span:nth-child(2){animation-delay:.2s}
+  .cb-typing .cb-bubble span:nth-child(3){animation-delay:.4s}
+  @keyframes cb-blink{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+
+  /* === Input row === */
+  .cb-input-row {
+    display: flex; gap: 8px; padding: 12px 16px;
+    background: #fff; border-top: 1px solid #f1f3f5;
+  }
+  #cb-input {
+    flex: 1; background: #f8f9fa;
+    border: 1.5px solid #dee2e6; border-radius: 24px;
+    color: #1e293b; font-size: 0.83rem;
+    padding: 9px 16px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  #cb-input:focus {
+    border-color: #ee4d2d;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(238,77,45,0.1);
+  }
+  #cb-input::placeholder { color: #adb5bd; }
+  #cb-send {
+    background: linear-gradient(135deg, #ee4d2d, #ff6633);
+    color: #fff; border: none; border-radius: 50%;
+    width: 38px; height: 38px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+    box-shadow: 0 2px 8px rgba(238,77,45,0.35);
+  }
+  #cb-send:hover { transform: scale(1.08); box-shadow: 0 4px 14px rgba(238,77,45,0.45); }
+  #cb-send:active { transform: scale(0.95); }
+  #cb-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  #cb-send i { font-size: 0.9rem; }
+
+  /* === Error === */
+  #cb-error {
+    display: none;
+    margin: 0 16px 8px;
+    background: #fff5f5; border: 1px solid #fecaca;
+    border-radius: 8px; color: #dc2626;
+    font-size: 0.75rem; padding: 8px 12px;
+  }
+
+  /* === Welcome chip === */
+  .cb-welcome {
+    display: flex; align-items: center; gap: 8px;
+    background: #fff3f0; border: 1px solid rgba(238,77,45,0.15);
+    border-radius: 12px; padding: 10px 12px;
+    font-size: 0.8rem; color: #ee4d2d; font-weight: 500;
+  }
+  .cb-welcome i { font-size: 1rem; }
+</style>
+
+<!-- FAB Button -->
+<button id="chat-fab" aria-label="Mở chat hỗ trợ dinh dưỡng">
+  <span class="fab-badge" id="chat-badge">1</span>
+  <i class="fas fa-comment-dots"></i>
+</button>
+
+<!-- Chat Panel -->
+<div id="chat-panel" role="dialog" aria-label="Chatbot tư vấn dinh dưỡng">
+
+  <!-- Header -->
+  <div class="cb-header">
+    <div class="cb-header-avatar">
+      <i class="fas fa-robot"></i>
+    </div>
+    <div class="cb-header-info">
+      <h2>Tư vấn dinh dưỡng</h2>
+      <div class="cb-header-status">
+        <span class="cb-status-dot"></span>
+        Trực tuyến &bull; Phản hồi ngay
+      </div>
+    </div>
+    <button class="cb-close-btn" id="cb-close-btn" aria-label="Đóng chat">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div id="cb-window"></div>
+
+  <div id="cb-error"></div>
+
+  <!-- Input -->
+  <div class="cb-input-row">
+    <input type="text" id="cb-input" placeholder="Nhập câu hỏi dinh dưỡng..." autocomplete="off"/>
+    <button id="cb-send" aria-label="Gửi tin nhắn">
+      <i class="fas fa-paper-plane"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const fab      = document.getElementById('chat-fab');
+  const panel    = document.getElementById('chat-panel');
+  const closeBtn = document.getElementById('cb-close-btn');
+  const cbWindow = document.getElementById('cb-window');
+  const cbInput  = document.getElementById('cb-input');
+  const cbSend   = document.getElementById('cb-send');
+  const cbError  = document.getElementById('cb-error');
+  const cbBadge  = document.getElementById('chat-badge');
+
+  function togglePanel() {
+    const isOpen = panel.classList.toggle('open');
+    fab.classList.toggle('open', isOpen);
+    cbBadge.style.display = 'none';
+    if (isOpen) {
+      setTimeout(() => cbInput.focus(), 280);
+      if (cbWindow.children.length === 0) {
+        appendWelcome();
+      }
+    }
+  }
+
+  fab.addEventListener('click', togglePanel);
+  closeBtn.addEventListener('click', togglePanel);
+
+  function appendWelcome() {
+    const el = document.createElement('div');
+    el.className = 'cb-welcome';
+    el.innerHTML = '<i class="fas fa-utensils"></i><span>Xin chào! Tôi là trợ lý dinh dưỡng. Hãy hỏi tôi về chế độ ăn phù hợp với bạn!</span>';
+    cbWindow.appendChild(el);
+  }
+
+  function appendMsg(role, text) {
+    const wrap   = document.createElement('div');
+    wrap.className = `cb-msg ${role}`;
+    const label  = document.createElement('div');
+    label.className = 'cb-label';
+    label.textContent = role === 'user' ? 'Bạn' : 'Trợ lý';
+    const bubble = document.createElement('div');
+    bubble.className = 'cb-bubble';
+    bubble.textContent = text;
+    wrap.appendChild(label);
+    wrap.appendChild(bubble);
+    cbWindow.appendChild(wrap);
+    cbWindow.scrollTop = cbWindow.scrollHeight;
+  }
+
+  function showTyping() {
+    const wrap = document.createElement('div');
+    wrap.className = 'cb-msg bot cb-typing';
+    wrap.id = 'cb-typing';
+    const label = document.createElement('div');
+    label.className = 'cb-label';
+    label.textContent = 'Trợ lý';
+    const bubble = document.createElement('div');
+    bubble.className = 'cb-bubble';
+    bubble.innerHTML = '<span></span><span></span><span></span>';
+    wrap.appendChild(label);
+    wrap.appendChild(bubble);
+    cbWindow.appendChild(wrap);
+    cbWindow.scrollTop = cbWindow.scrollHeight;
+  }
+
+  function removeTyping() { document.getElementById('cb-typing')?.remove(); }
+
+  function showError(msg) {
+    cbError.textContent = msg;
+    cbError.style.display = 'block';
+  }
+  function clearError() {
+    cbError.style.display = 'none';
+    cbError.textContent = '';
+  }
+
+  async function sendMessage() {
+    const text = cbInput.value.trim();
+    if (!text) return;
+    clearError();
+    appendMsg('user', text);
+    cbInput.value = '';
+    cbSend.disabled = true;
+    showTyping();
+    try {
+      const res = await fetch('/chat/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          request:  text,
+          goal:     'lose_weight',
+          diseases: []
+        })
+      });
+      removeTyping();
+      if (!res.ok) throw new Error(`Lỗi ${res.status}`);
+      const data = await res.json();
+      appendMsg('bot', data.response ?? 'Không có phản hồi.');
+    } catch (err) {
+      removeTyping();
+      showError('Lỗi kết nối: ' + err.message);
+    } finally {
+      cbSend.disabled = false;
+      cbInput.focus();
+    }
+  }
+
+  cbSend.addEventListener('click', sendMessage);
+  cbInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  // Badge sau 3s để thu hút user
+  setTimeout(() => {
+    if (!panel.classList.contains('open')) {
+      cbBadge.style.display = 'flex';
+    }
+  }, 3000);
+})();
+</script>
+<!-- ===== /CHAT BUBBLE ===== -->
+
 </body>
 
 </html>

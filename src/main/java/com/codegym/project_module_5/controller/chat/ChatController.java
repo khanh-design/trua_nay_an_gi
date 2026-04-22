@@ -3,10 +3,12 @@ package com.codegym.project_module_5.controller.chat;
 import com.codegym.project_module_5.model.dto.ChatRequest;
 import com.codegym.project_module_5.service.chat_service.ChatService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -19,38 +21,37 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    // Load trang chat
+    // Hiển thị trang chat
     @GetMapping("")
     public String chatPage(Model model) {
-
         model.addAttribute("chatRequest", new ChatRequest());
-
         return "chat/chat_message";
     }
 
-    // xử lý khi user gửi message
+    // Endpoint JSON cho fetch từ JS
     @PostMapping("/message")
-    public String sendMessage(
-            @ModelAttribute("chatRequest") ChatRequest chatRequest,
-            Model model,
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> sendMessage(
+            @RequestBody ChatRequest chatRequest,
             HttpSession session
     ) {
+        try {
+            String userId = (String) session.getAttribute("userId");
+            if (userId == null) {
+                userId = UUID.randomUUID().toString();
+                session.setAttribute("userId", userId);
+            }
 
-        // 🔥 tạo userId nếu chưa có
-        String userId = (String) session.getAttribute("userId");
+            chatRequest.setUserId(userId);
 
-        if (userId == null) {
-            userId = UUID.randomUUID().toString();
-            session.setAttribute("userId", userId);
+            String response = chatService.generate(chatRequest);
+
+            return ResponseEntity.ok(Map.of("response", response));
+        } catch (Exception e) {
+            System.err.println("Lỗi trong ChatController: " + e.getMessage());
+            return ResponseEntity
+                    .internalServerError()
+                    .body(Map.of("error", "Không thể xử lý yêu cầu: " + e.getMessage()));
         }
-
-        chatRequest.setUserId(userId);
-
-        String response = chatService.generate(chatRequest);
-
-        model.addAttribute("response", response);
-        model.addAttribute("chatRequest", chatRequest);
-
-        return "chat/chat_message";
     }
 }
