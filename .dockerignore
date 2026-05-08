@@ -1,0 +1,35 @@
+# Build outputs
+build/
+bin/
+out/
+
+# IDE files
+.idea/
+.vscode/
+*.iws
+*.iml
+*.ipr
+
+# Git
+.git/
+.gitattributes
+
+# Gradle caches
+.gradle/
+
+# Agent config
+.agent/
+
+# Documentation
+docs/
+README.md
+*.sql
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Docker files (prevent recursive copy)
+Dockerfile
+docker-compose.yml
+.dockerignore

@@ -1,0 +1,87 @@
+# ============================================
+# Docker Compose - Trưa Nay Ăn Gì (Development)
+# ============================================
+# Usage:
+#   docker compose up -d          → Start all services
+#   docker compose up --build     → Rebuild & start
+#   docker compose down           → Stop all
+#   docker compose down -v        → Stop & delete data
+#   docker compose logs -f app    → View app logs
+#   docker compose logs -f db     → View MySQL logs
+
+services:
+  # ── MySQL Database ──────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: truanayangi_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-123456}
+      MYSQL_DATABASE: casestudy
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"   # Host 3307 → tránh conflict với MySQL local
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/init:/docker-entrypoint-initdb.d   # Auto-import SQL seed
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=caching_sha2_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_PASSWORD:-123456}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - app_network
+
+  # ── Spring Boot Application ─────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: truanayangi_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Database (override application.properties)
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/casestudy?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-123456}
+
+      # JPA
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+
+      # Env vars from .env file
+      MYSQL_USER: ${MYSQL_USER:-root}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-}
+      SENDGRID_TEMPLATE_REGISTER_ID: ${SENDGRID_TEMPLATE_REGISTER_ID:-}
+      GEMINI_KEY: ${GEMINI_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+      BASE_AND_URL: ${BASE_AND_URL:-https://generativelanguage.googleapis.com/v1beta/openai/}
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads    # Persist uploaded files
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app_network
+
+# ── Volumes ─────────────────────────────────
+volumes:
+  mysql_data:
+    driver: local
+
+# ── Networks ────────────────────────────────
+networks:
+  app_network:
+    driver: bridge
