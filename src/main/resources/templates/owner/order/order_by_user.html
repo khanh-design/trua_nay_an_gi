@@ -114,7 +114,7 @@
             <tr th:each="order : ${ordersList}">
                 <td th:text="${order.getId()}" data-label="Mã đơn hàng"></td>
                 <td data-label="Hình ảnh">
-                    <img th:src="@{'/images/dish/' + ${order.getDish().getPictureUrl()}}" alt="">
+                    <img th:src="@{'/images/' + ${order.getDish().getPictureUrl()}}" alt="">
                 </td>
                 <td th:text="${order.getOrder().getUser().getPhone()}" data-label="Số điện thoại"></td>
                 <td th:text="${order.getOrder().getAddress()}" data-label="Địa chỉ"></td>

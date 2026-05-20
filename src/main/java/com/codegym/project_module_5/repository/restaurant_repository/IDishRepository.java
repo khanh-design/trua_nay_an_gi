@@ -20,9 +20,9 @@ public interface IDishRepository extends JpaRepository<Dish, Long> {
     Iterable<Dish> findAllByRestaurantIsApprovedTrueAndRestaurantIsLockedFalse(); //Tìm tất cả các món ăn từ các nhà hàng đã được duyệt và đang hoạt động.
     Iterable<Dish> findAllByNameContainingIgnoreCaseAndRestaurantIsApprovedTrueAndRestaurantIsLockedFalse(String name); //Tìm kiếm các món ăn theo tên từ các nhà hàng đã được duyệt và đang hoạt động.
     Optional<Dish> findDishById(Long id);
-    @Query("SELECT d FROM Dish d WHERE d.category.id = :categoryId AND d.id != :excludeDishId AND d.isAvailable = true ORDER BY d.id DESC LIMIT 6")
+    @Query("SELECT d FROM Dish d WHERE d.category.id = :categoryId AND d.id != :excludeDishId AND d.isAvailable = true AND d.restaurant.isApproved = true AND d.restaurant.isLocked = false ORDER BY d.id DESC LIMIT 6")
     List<Dish> findSimilarDishesByCategory(@Param("categoryId") Long categoryId, @Param("excludeDishId") Long excludeDishId);
-    @Query("SELECT d FROM Dish d WHERE d.restaurant.id = :restaurantId AND d.id != :excludeDishId AND d.isAvailable = true ORDER BY d.id DESC LIMIT 6")
+    @Query("SELECT d FROM Dish d WHERE d.restaurant.id = :restaurantId AND d.id != :excludeDishId AND d.isAvailable = true AND d.restaurant.isApproved = true AND d.restaurant.isLocked = false ORDER BY d.id DESC LIMIT 6")
     List<Dish> findPopularDishesByRestaurant(@Param("restaurantId") Long restaurantId, @Param("excludeDishId") Long excludeDishId);
 
     List<Dish> findByRestaurant_Id(Long Id);
@@ -42,8 +42,12 @@ public interface IDishRepository extends JpaRepository<Dish, Long> {
     @Query("SELECT d FROM Dish d WHERE d.restaurant.isApproved = true AND d.restaurant.isLocked = false AND d.isAvailable = true ORDER BY d.id DESC")
     List<Dish> findHotPickDishes(Pageable pageable);
     
-    @Query("SELECT d FROM Dish d WHERE d.restaurant.isApproved = true AND d.restaurant.isLocked = false AND d.isAvailable = true ORDER BY RAND()")
-    List<Dish> findNearbyDishes(Pageable pageable);
+    @Query(value = "SELECT d.* FROM dish d JOIN restaurant r ON d.restaurant_id = r.id " +
+           "WHERE r.is_approved = true AND r.is_locked = false AND d.is_available = true " +
+           "AND r.rlatitude IS NOT NULL AND r.rlongitude IS NOT NULL " +
+           "ORDER BY (6371 * ACOS(COS(RADIANS(:lat)) * COS(RADIANS(r.rlatitude)) * COS(RADIANS(r.rlongitude) - RADIANS(:lng)) + SIN(RADIANS(:lat)) * SIN(RADIANS(r.rlatitude)))) ASC",
+           nativeQuery = true)
+    List<Dish> findNearbyDishes(@Param("lat") Double lat, @Param("lng") Double lng, Pageable pageable);
 
     @Query("SELECT d FROM Dish d " +
        "WHERE lower(d.name) LIKE lower(concat('%', :keyword, '%')) " +

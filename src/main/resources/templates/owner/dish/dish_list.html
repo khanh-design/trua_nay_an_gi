@@ -354,7 +354,7 @@
                                             <tbody>
                                                 <tr th:each="dish : ${dishes}">
                                                     <td>
-                                                        <img th:src="${'/images/dish/' + dish.getPictureUrl()}"
+                                                        <img th:src="@{'/images/' + dish.getPictureUrl()}"
                                                             alt="Dish Image" class="table-dish-img">
                                                     </td>
                                                     <td class="fw-bold" th:text="${dish.name}"></td>

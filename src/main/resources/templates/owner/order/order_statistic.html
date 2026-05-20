@@ -123,7 +123,7 @@
                                 <td th:text="${row.getOrder().getId()}"></td>
                                 <td th:text="${row.getDish().getName()}"></td>
                                 <td>
-                                    <img th:src="@{'/images/dish/' + ${row.getDish().getPictureUrl()}}" alt="Ảnh món"
+                                    <img th:src="@{'/images/' + ${row.getDish().getPictureUrl()}}" alt="Ảnh món"
                                          class="dish-img">
                                 </td>
                                 <td th:text="${row.getOrder().getUser().getUsername()}"></td>

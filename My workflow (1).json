@@ -28,7 +28,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "{\n  \"chatInput\": \"{{$json.body.message}}\"\n}\n",
+        "jsonOutput": "{\n  \"chatInput\": \"{{$json.body.message}}\",\n  \"userId\": \"{{$json.body.userId}}\",\n  \"goal\": \"{{$json.body.goal}}\",\n  \"healthProfile\": {{JSON.stringify($json.body.healthProfile || {})}}\n}\n",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -43,7 +43,7 @@
     {
       "parameters": {
         "options": {
-          "systemMessage": "=Bạn là trợ lý ảo của hệ thống FOOD SYSTEM. Hãy sử dụng những dữ liệu được cung cấp để trả lời các câu hỏi của khách hàng."
+          "systemMessage": "=Bạn là trợ lý dinh dưỡng AI của FOOD SYSTEM.\n\n## THÔNG TIN SỨC KHỎE KHÁCH HÀNG\n{{$json.healthProfile ? 'BMI: ' + $json.healthProfile.bmi + ' (' + $json.healthProfile.bmiCategory + ')\nBMR: ' + $json.healthProfile.bmr + ' kcal/ngày\nTDEE: ' + $json.healthProfile.tdee + ' kcal/ngày\nMục tiêu calo: ' + $json.healthProfile.targetCalories + ' kcal/ngày\nMục tiêu: ' + $json.healthProfile.goal : 'Chưa có thông tin thể trạng'}}\n\n## NHIỆM VỤ\n1. Dựa vào chỉ số BMI/BMR/TDEE và mục tiêu calo ở trên để tư vấn\n2. Đề xuất món ăn từ menu hệ thống, phân bổ 3 bữa: Sáng (25%), Trưa (40%), Tối (35%)\n3. Cân bằng Protein / Carb / Fat theo mục tiêu\n4. Trả lời bằng tiếng Việt, thân thiện\n5. Nếu khách có bệnh nền, điều chỉnh tư vấn phù hợp"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -84,7 +84,7 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $json.chatInput }}"
+        "sessionKey": "={{ $json.userId }}"
       },
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,

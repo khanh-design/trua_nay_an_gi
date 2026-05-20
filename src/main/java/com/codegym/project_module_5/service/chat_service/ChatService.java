@@ -1,6 +1,7 @@
 package com.codegym.project_module_5.service.chat_service;
 
 import com.codegym.project_module_5.model.dto.ChatRequest;
+import com.codegym.project_module_5.model.user_model.UserHealthProfile;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,9 +20,9 @@ public class ChatService {
     }
 
     @SuppressWarnings("unchecked")
-    public String generate(ChatRequest chatRequest) {
+    public String generate(ChatRequest chatRequest, UserHealthProfile healthProfile) {
 
-        String url = "https://dothuyen24.app.n8n.cloud/webhook/c8075e94-5b2c-4dd1-b75d-61ddf17d1c45";
+        String url = "https://edric26.app.n8n.cloud/webhook/c8075e94-5b2c-4dd1-b75d-61ddf17d1c45";
 
         // Body gửi sang n8n
         Map<String, Object> requestBody = new HashMap<>();
@@ -29,6 +30,23 @@ public class ChatService {
         requestBody.put("goal", chatRequest.getGoal());
         requestBody.put("diseases", chatRequest.getDiseases());
         requestBody.put("userId", chatRequest.getUserId());
+
+        // Gửi health metrics nếu có
+        if (healthProfile != null) {
+            Map<String, Object> health = new HashMap<>();
+            health.put("weight", healthProfile.getWeight());
+            health.put("height", healthProfile.getHeight());
+            health.put("age", healthProfile.getAge());
+            health.put("gender", healthProfile.getGender());
+            health.put("activityLevel", healthProfile.getActivityLevel());
+            health.put("bmi", healthProfile.getBmi());
+            health.put("bmr", healthProfile.getBmr());
+            health.put("tdee", healthProfile.getTdee());
+            health.put("targetCalories", healthProfile.getTargetCalories());
+            health.put("bmiCategory", healthProfile.getBmiCategory());
+            health.put("goal", healthProfile.getGoal());
+            requestBody.put("healthProfile", health);
+        }
 
         // Header
         HttpHeaders headers = new HttpHeaders();
