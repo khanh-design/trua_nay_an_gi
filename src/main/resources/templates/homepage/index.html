@@ -215,7 +215,7 @@
                class="carousel-item"
                th:classappend="${iter.index == 0} ? ' active'">
             <a th:href="@{/dish/{id}(id=${b.dish.id})}">
-              <img th:src="@{'/images/dish/' + ${b.dish.pictureUrl}}"
+              <img th:src="@{'/images/' + ${b.dish.pictureUrl}}"
                    class="d-block w-100 banner-img"
                    th:alt="${b.dish.name}">
               <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded-3 p-2">
@@ -246,7 +246,7 @@
                class="carousel-item"
                th:classappend="${iter.index == 0} ? ' active'">
             <a th:href="@{/dish/{id}(id=${b.dish.id})}">
-              <img th:src="@{'/images/dish/' + ${b.dish.pictureUrl}}"
+              <img th:src="@{'/images/' + ${b.dish.pictureUrl}}"
                    class="d-block w-100 banner-img"
                    th:alt="${b.dish.name}">
               <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded-3 p-2">
@@ -360,7 +360,7 @@
     <th:block th:each="restaurantEntry : ${dishesByRestaurant}">
       <div class="dish-card" th:each="dish : ${restaurantEntry.value}">
         <div class="dish-image-container">
-          <img th:src="@{'/images/dish/' + ${dish.pictureUrl}}" class="dish-image" th:alt="${dish.name}">
+          <img th:src="@{'/images/' + ${dish.pictureUrl}}" class="dish-image" th:alt="${dish.name}">
           <div class="available-indicator"></div>
           <div class="favorite-badge" th:data-dish-id="${dish.id}">
             <i class="fas fa-heart"></i>
@@ -840,14 +840,115 @@
     </button>
   </div>
 
+  <!-- Health Profile Form -->
+  <div id="health-form-container" style="display:none;">
+    <div style="padding: 16px; overflow-y: auto; max-height: calc(100% - 56px);">
+      <div class="cb-welcome" style="margin-bottom: 12px;">
+        <i class="fas fa-heartbeat"></i>
+        <span>Nhập thông tin thể trạng để tôi tư vấn chế độ ăn phù hợp nhất!</span>
+      </div>
+      <form id="health-form" autocomplete="off">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <div>
+            <label style="font-size:0.75rem;color:#666;margin-bottom:2px;display:block;">Cân nặng (kg)</label>
+            <input type="number" id="hf-weight" placeholder="VD: 70" step="0.1" min="30" max="250" required
+                   style="width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.85rem;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem;color:#666;margin-bottom:2px;display:block;">Chiều cao (cm)</label>
+            <input type="number" id="hf-height" placeholder="VD: 170" step="0.1" min="100" max="250" required
+                   style="width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.85rem;">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <div>
+            <label style="font-size:0.75rem;color:#666;margin-bottom:2px;display:block;">Tuổi</label>
+            <input type="number" id="hf-age" placeholder="VD: 25" min="10" max="100" required
+                   style="width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.85rem;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem;color:#666;margin-bottom:2px;display:block;">Giới tính</label>
+            <select id="hf-gender" required
+                    style="width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.85rem;background:#fff;">
+              <option value="">Chọn...</option>
+              <option value="male">Nam</option>
+              <option value="female">Nữ</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <label style="font-size:0.75rem;color:#666;margin-bottom:2px;display:block;">Mức vận động</label>
+          <select id="hf-activity" required
+                  style="width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.85rem;background:#fff;">
+            <option value="">Chọn mức vận động...</option>
+            <option value="sedentary">Ít vận động (ngồi văn phòng)</option>
+            <option value="light">Nhẹ (tập 1-3 ngày/tuần)</option>
+            <option value="moderate">Vừa (tập 3-5 ngày/tuần)</option>
+            <option value="active">Nặng (tập 6-7 ngày/tuần)</option>
+            <option value="very_active">Rất nặng (VĐV chuyên nghiệp)</option>
+          </select>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:0.75rem;color:#666;margin-bottom:2px;display:block;">Mục tiêu</label>
+          <select id="hf-goal" required
+                  style="width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.85rem;background:#fff;">
+            <option value="">Chọn mục tiêu...</option>
+            <option value="lose_weight">Giảm cân</option>
+            <option value="maintain">Duy trì cân nặng</option>
+            <option value="gain_muscle">Tăng cơ / Tăng cân</option>
+          </select>
+        </div>
+        <button type="submit" id="hf-submit"
+                style="width:100%;padding:10px;background:linear-gradient(135deg,#ee4d2d,#ff6633);color:#fff;border:none;border-radius:10px;font-weight:600;font-size:0.9rem;cursor:pointer;transition:opacity .2s;">
+          <i class="fas fa-calculator" style="margin-right:6px;"></i>Tính chỉ số & Bắt đầu tư vấn
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Health Results Card (hiển thị sau khi submit form) -->
+  <div id="health-results" style="display:none; padding:12px 16px;">
+    <div style="background:linear-gradient(135deg,#667eea,#764ba2);border-radius:12px;padding:14px;color:#fff;margin-bottom:8px;">
+      <div style="font-weight:700;font-size:0.95rem;margin-bottom:8px;">
+        <i class="fas fa-chart-line" style="margin-right:6px;"></i>Kết quả phân tích
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;">
+        <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:8px;text-align:center;">
+          <div style="opacity:0.8;">BMI</div>
+          <div style="font-size:1.2rem;font-weight:700;" id="res-bmi">--</div>
+          <div style="font-size:0.7rem;opacity:0.9;" id="res-bmi-cat">--</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:8px;text-align:center;">
+          <div style="opacity:0.8;">BMR</div>
+          <div style="font-size:1.2rem;font-weight:700;" id="res-bmr">--</div>
+          <div style="font-size:0.7rem;opacity:0.9;">kcal/ngày</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:8px;text-align:center;">
+          <div style="opacity:0.8;">TDEE</div>
+          <div style="font-size:1.2rem;font-weight:700;" id="res-tdee">--</div>
+          <div style="font-size:0.7rem;opacity:0.9;">kcal/ngày</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.2);border-radius:8px;padding:8px;text-align:center;">
+          <div style="opacity:0.8;">Mục tiêu</div>
+          <div style="font-size:1.2rem;font-weight:700;" id="res-target">--</div>
+          <div style="font-size:0.7rem;opacity:0.9;">kcal/ngày</div>
+        </div>
+      </div>
+    </div>
+    <button id="start-chat-btn"
+            style="width:100%;padding:8px;background:#ee4d2d;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;">
+      <i class="fas fa-comments" style="margin-right:4px;"></i>Bắt đầu tư vấn món ăn
+    </button>
+  </div>
+
   <!-- Messages -->
   <div id="cb-window"></div>
 
   <div id="cb-error"></div>
 
   <!-- Input -->
-  <div class="cb-input-row">
-    <input type="text" id="cb-input" placeholder="Nhập câu hỏi dinh dưỡng..." autocomplete="off"/>
+  <div class="cb-input-row" style="display:none;" id="cb-input-container">
+    <input type="text" id="cb-input" placeholder="Hỏi về chế độ ăn phù hợp với bạn..." autocomplete="off"/>
     <button id="cb-send" aria-label="Gửi tin nhắn">
       <i class="fas fa-paper-plane"></i>
     </button>
@@ -865,25 +966,85 @@
   const cbError  = document.getElementById('cb-error');
   const cbBadge  = document.getElementById('chat-badge');
 
+  const healthForm       = document.getElementById('health-form');
+  const healthFormBox    = document.getElementById('health-form-container');
+  const healthResults    = document.getElementById('health-results');
+  const startChatBtn     = document.getElementById('start-chat-btn');
+  const cbInputContainer = document.getElementById('cb-input-container');
+
+  let healthProfileSaved = false;
+
   function togglePanel() {
     const isOpen = panel.classList.toggle('open');
     fab.classList.toggle('open', isOpen);
     cbBadge.style.display = 'none';
-    if (isOpen) {
-      setTimeout(() => cbInput.focus(), 280);
-      if (cbWindow.children.length === 0) {
-        appendWelcome();
-      }
+    if (isOpen && !healthProfileSaved) {
+      healthFormBox.style.display = 'block';
+      cbWindow.style.display = 'none';
+      cbInputContainer.style.display = 'none';
     }
   }
 
   fab.addEventListener('click', togglePanel);
   closeBtn.addEventListener('click', togglePanel);
 
+  // Health form submit
+  healthForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const submitBtn = document.getElementById('hf-submit');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Đang tính toán...';
+
+    const payload = {
+      weight: parseFloat(document.getElementById('hf-weight').value),
+      height: parseFloat(document.getElementById('hf-height').value),
+      age: parseInt(document.getElementById('hf-age').value),
+      gender: document.getElementById('hf-gender').value,
+      activityLevel: document.getElementById('hf-activity').value,
+      goal: document.getElementById('hf-goal').value
+    };
+
+    try {
+      const res = await fetch('/chat/health-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('res-bmi').textContent = data.bmi;
+        document.getElementById('res-bmi-cat').textContent = data.bmiCategory;
+        document.getElementById('res-bmr').textContent = Math.round(data.bmr);
+        document.getElementById('res-tdee').textContent = Math.round(data.tdee);
+        document.getElementById('res-target').textContent = Math.round(data.targetCalories);
+
+        healthFormBox.style.display = 'none';
+        healthResults.style.display = 'block';
+        healthProfileSaved = true;
+      } else {
+        alert('Lỗi: ' + (data.error || 'Không xác định'));
+      }
+    } catch (err) {
+      alert('Lỗi kết nối: ' + err.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-calculator" style="margin-right:6px;"></i>Tính chỉ số & Bắt đầu tư vấn';
+    }
+  });
+
+  // Start chat after seeing results
+  startChatBtn.addEventListener('click', function() {
+    healthResults.style.display = 'none';
+    cbWindow.style.display = 'block';
+    cbInputContainer.style.display = 'flex';
+    appendWelcome();
+    setTimeout(() => cbInput.focus(), 100);
+  });
+
   function appendWelcome() {
     const el = document.createElement('div');
     el.className = 'cb-welcome';
-    el.innerHTML = '<i class="fas fa-utensils"></i><span>Xin chào! Tôi là trợ lý dinh dưỡng. Hãy hỏi tôi về chế độ ăn phù hợp với bạn!</span>';
+    el.innerHTML = '<i class="fas fa-utensils"></i><span>Chỉ số của bạn đã được ghi nhận! Hãy hỏi tôi về chế độ ăn phù hợp, ví dụ: "Gợi ý thực đơn 3 bữa hôm nay"</span>';
     cbWindow.appendChild(el);
   }
 
@@ -943,7 +1104,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           request:  text,
-          goal:     'lose_weight',
+          goal:     document.getElementById('hf-goal')?.value || 'maintain',
           diseases: []
         })
       });

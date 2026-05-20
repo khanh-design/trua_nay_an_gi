@@ -202,7 +202,7 @@
                 <p class="text-center text-muted">Chưa có món ăn nào.</p>
             </div>
             <div th:each="dish : ${dishes}" class="dish-item" th:data-category="${dish.category.name}">
-                <img th:src="@{'/images/dish/' + ${dish.pictureUrl}}" th:alt="${dish.name}">
+                <img th:src="@{'/images/' + ${dish.pictureUrl}}" th:alt="${dish.name}">
                 <div class="dish-info">
                     <div class="dish-name" th:text="${dish.name}">Tên món</div>
                     <div class="dish-price">
