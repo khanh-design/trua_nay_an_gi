@@ -95,7 +95,7 @@
           <ul class="list-group list-group-flush">
             <li th:each="detail : ${orderDetails}" class="list-group-item d-flex justify-content-between align-items-center">
               <div class="d-flex align-items-center">
-                <img th:src="@{'/images/dish/' + ${detail.dish.pictureUrl}}" alt="Ảnh món ăn" class="item-image me-3">
+                <img th:src="@{'/images/' + ${detail.dish.pictureUrl}}" alt="Ảnh món ăn" class="item-image me-3">
                 <div>
                   <h6 class="my-0" th:text="${detail.dish.name}"></h6>
                   <small class="text-muted" th:text="'Số lượng: ' + ${detail.quantity}"></small>

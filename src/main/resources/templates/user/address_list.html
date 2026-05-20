@@ -135,11 +135,11 @@
                                 </button>
                             </form>
 
-                            <a th:href="@{'/addresses/edit/' + ${addr.id}}"
+                            <a th:href="@{'/user/addresses/edit/' + ${addr.id}}"
                                 class="btn btn-outline-secondary btn-sm me-2">
                                 <i class="bi bi-pencil"></i> Sửa
                             </a>
-                            <a th:href="@{'/addresses/delete/' + ${addr.id}}" class="btn btn-outline-danger btn-sm"
+                            <a th:href="@{'/user/addresses/delete/' + ${addr.id}}" class="btn btn-outline-danger btn-sm"
                                 onclick="return confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')">
                                 <i class="bi bi-trash"></i> Xóa
                             </a>

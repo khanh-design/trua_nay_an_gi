@@ -4,11 +4,14 @@ import com.codegym.project_module_5.model.user_model.Role;
 import com.codegym.project_module_5.repository.user_repository.IRoleRepository;
 import com.codegym.project_module_5.repository.user_repository.IUserRepository;
 import com.codegym.project_module_5.service.impl.user_service_impl.UserDetailsServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,6 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
@@ -74,10 +78,9 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/", "/home", "/dish/**", "/restaurant_client/**").permitAll()
                         .requestMatchers("/account/**","/register","/verify-otp").permitAll()
-
-                        // *** THÊM DÒNG NÀY ĐỂ CHO PHÉP TRUY CẬP GIỎ HÀNG ***
+                        .requestMatchers("/chat/**").permitAll()
                         .requestMatchers("/cart/**").permitAll()
-
+                        .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/restaurants/signup").authenticated()
                         .requestMatchers("/restaurants/**").hasAnyAuthority("OWNER", "ADMIN")
@@ -95,7 +98,24 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/account/login?logout=true")
                         .permitAll()
+                )
+                .exceptionHandling(exceptions -> exceptions
+                        .accessDeniedHandler(accessDeniedHandler())
                 );
         return http.build();
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (HttpServletRequest request, HttpServletResponse response,
+                AccessDeniedException accessDeniedException) -> {
+            String message;
+            if (request.getUserPrincipal() == null) {
+                message = "Bạn cần đăng nhập để truy cập trang này.";
+            } else {
+                message = "Bạn không có quyền truy cập trang này. Nếu bạn là chủ nhà hàng, vui lòng đăng ký nhà hàng trước.";
+            }
+            response.sendRedirect("/error/403?message=" + java.net.URLEncoder.encode(message, java.nio.charset.StandardCharsets.UTF_8));
+        };
     }
 }

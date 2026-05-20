@@ -128,7 +128,7 @@
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="/">
             <img src="/images/logo/logo_thiet_ke.png" alt="Logo" width="40" height="40" class="me-2 rounded-circle">
-            <span class="fw-bold">FoodDelivery</span>
+            <span class="fw-bold">FoodDeliveryđ</span>
         </a>
         <div class="d-flex align-items-center">
             <a href="/home" class="btn btn-outline-secondary me-2">
@@ -202,7 +202,7 @@
                 <p class="text-center text-muted">Chưa có món ăn nào.</p>
             </div>
             <div th:each="dish : ${dishes}" class="dish-item" th:data-category="${dish.category.name}">
-                <img th:src="@{'/images/dish/' + ${dish.pictureUrl}}" th:alt="${dish.name}">
+                <img th:src="@{'/images/' + ${dish.pictureUrl}}" th:alt="${dish.name}">
                 <div class="dish-info">
                     <div class="dish-name" th:text="${dish.name}">Tên món</div>
                     <div class="dish-price">

@@ -14,12 +14,12 @@ import lombok.Data;
 @Entity
 @Data
 public class Banner {
-@Id
- @GeneratedValue (strategy = GenerationType.IDENTITY)
-private Long id;
-@OneToOne
-@JoinColumn(name = "dish_id")
-private Dish dish;
-private boolean  featured;
-private boolean  promotion;
+    @Id
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    private Long id;
+    @OneToOne
+    @JoinColumn(name = "dish_id")
+    private Dish dish;
+    private boolean  featured;
+    private boolean  promotion;
 }

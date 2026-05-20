@@ -50,11 +50,13 @@ public class HomeController {
 
     @GetMapping
     public String index(Model model,
-                        @PageableDefault(value = 8) Pageable pageable,
+                        @PageableDefault(value = 10) Pageable pageable,
                         @RequestParam(name = "search", required = false) String search,
                         @RequestParam(name = "categoryId", required = false) Long categoryId,
                         @RequestParam(name = "menuType", required = false, defaultValue = "default") String menuType,
-                        @RequestParam(name = "couponCode", required = false) String couponCode) {
+                        @RequestParam(name = "couponCode", required = false) String couponCode,
+                        @RequestParam(name = "lat", required = false) Double lat,
+                        @RequestParam(name = "lng", required = false) Double lng) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken);
@@ -81,6 +83,14 @@ public class HomeController {
         } else if (menuType != null && !menuType.equals("default")) {
             List<Dish> menuDishes;
             switch (menuType) {
+                case "nearby":
+                    if (lat != null && lng != null) {
+                        menuDishes = dishService.findNearbyDishes(lat, lng, pageable);
+                    } else {
+                        menuDishes = new ArrayList<>();
+                        dishService.findAllAvailableDishes().forEach(menuDishes::add);
+                    }
+                    break;
                 case "new-dishes":
                     // Giả sử có phương thức này, nếu không cần tạo mới
                     // Dựa theo IDishService, không có phương thức này
@@ -127,6 +137,8 @@ public class HomeController {
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("menuType", menuType);
         model.addAttribute("categories", categories);
+        model.addAttribute("lat", lat);
+        model.addAttribute("lng", lng);
 
         return "/homepage/index";
     }

@@ -97,8 +97,8 @@ public class DishService implements IDishService {
     }
     
     @Override
-    public List<Dish> findNearbyDishes(Pageable pageable) {
-        return dishRepository.findNearbyDishes(pageable);
+    public List<Dish> findNearbyDishes(Double lat, Double lng, Pageable pageable) {
+        return dishRepository.findNearbyDishes(lat, lng, pageable);
     }
 
     public Page<Dish> search(String keyword, Pageable pageable) {

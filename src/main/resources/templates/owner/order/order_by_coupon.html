@@ -114,7 +114,7 @@
         <tr th:each="row : ${couponsList}">
           <td th:text="${row.getOrder().getId()}"></td>
           <td>
-            <img th:src="'/images/dish/' + ${row.getDish().getPictureUrl()}" th:alt="${row.getDish().getPictureUrl()}">
+            <img th:src="@{'/images/' + ${row.getDish().getPictureUrl()}}" th:alt="${row.getDish().getPictureUrl()}">
           </td>
           <td th:text="${row.getOrder().getCoupon().getName()}"></td>
           <td th:text="${row.getOrder().getAddress()}"></td>
