@@ -6,6 +6,7 @@ import com.codegym.project_module_5.service.evaluate_serivce.IEvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,6 +27,11 @@ public class EvaluateService implements IEvaluateService {
     @Override
     public void save(Evaluate evaluate) {
         iEvaluateRepository.save(evaluate);
+    }
+
+    @Override
+    public List<Evaluate> findByRestaurantId(Long restaurantId) {
+        return iEvaluateRepository.findByRestaurantId(restaurantId);
     }
 
     @Override
