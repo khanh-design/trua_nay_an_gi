@@ -111,11 +111,21 @@
           <div class="card-header">
             <h4>Tóm tắt thanh toán</h4>
           </div>
-          <div class="card-body">
+          <div class="card-body" th:with="
+              subtotal=${#aggregates.sum(orderDetails.![price * quantity])},
+              discount=${order.coupon != null ? (subtotal + (subtotal * 0.05) - order.totalPrice) : 0}">
             <ul class="list-group list-group-flush">
               <li class="list-group-item d-flex justify-content-between">
-                <span>Tổng tiền hàng</span>
-                <span th:text="'₫' + ${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')}"></span>
+                <span>Tạm tính món ăn</span>
+                <span th:text="'₫' + ${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')}"></span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between" th:if="${order.coupon != null}">
+                <span>Khuyến mãi (<strong th:text="${order.coupon.name}"></strong>)</span>
+                <span class="text-success" th:text="'- ₫' + ${#numbers.formatDecimal(discount, 0, 'COMMA', 0, 'POINT')}"></span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between">
+                <span>Phí dịch vụ (5%)</span>
+                <span th:text="'₫' + ${#numbers.formatDecimal(subtotal * 0.05, 0, 'COMMA', 0, 'POINT')}"></span>
               </li>
               <li class="list-group-item d-flex justify-content-between">
                 <span>Phí vận chuyển</span>

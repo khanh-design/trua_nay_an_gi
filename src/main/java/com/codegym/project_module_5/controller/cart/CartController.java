@@ -291,6 +291,15 @@ public class CartController {
                 }
             }
 
+            if (!selectedCartItems.isEmpty()) {
+                Long restaurantId = selectedCartItems.get(0).getDish().getRestaurant().getId();
+                try {
+                    var couponsList = restaurantService.getCouponsByRestaurantId(restaurantId);
+                    model.addAttribute("coupons", couponsList);
+                } catch (Exception e) {
+                    model.addAttribute("coupons", new ArrayList<>());
+                }
+            }
 
             double serviceFee = Math.round(subtotal * 0.05);
 
@@ -421,6 +430,36 @@ public class CartController {
             totalPrice += item.getDish().getPrice() * item.getQuantity();
         }
 
+        // --- Tính toán mã giảm giá (Coupon) ---
+        String appliedCoupon = (String) session.getAttribute("appliedCoupon");
+        com.codegym.project_module_5.model.restaurant_model.Coupon coupon = null;
+        double discount = 0;
+        if (appliedCoupon != null && !appliedCoupon.isBlank()) {
+            try {
+                var coupons = restaurantService.getCouponsByRestaurantId(restaurantId);
+                var matched = coupons.stream()
+                        .filter(c -> Boolean.TRUE.equals(c.getIsAvailable()))
+                        .filter(c -> c.getName() != null && c.getName().equalsIgnoreCase(appliedCoupon.trim()))
+                        .findFirst();
+                if (matched.isPresent()) {
+                    coupon = matched.get();
+                    boolean minOk = coupon.getMinOrder() == null || totalPrice >= coupon.getMinOrder();
+                    if (minOk) {
+                        double d = 0;
+                        if (coupon.getFixedDiscount() != null) d += coupon.getFixedDiscount();
+                        if (coupon.getPercentDiscount() != null) d += totalPrice * (coupon.getPercentDiscount() / 100.0);
+                        if (coupon.getMaxDiscount() != null) d = Math.min(d, coupon.getMaxDiscount());
+                        discount = Math.max(0, Math.min(d, totalPrice));
+                    }
+                }
+            } catch (Exception e) {
+                // Bỏ qua lỗi truy vấn coupon
+            }
+        }
+
+        double serviceFee = Math.round(totalPrice * 0.05);
+        double grandTotal = Math.max(0, totalPrice - discount) + serviceFee + shipper.getPrice();
+
         Object note = session.getAttribute("orderNote");
         String customerNote = (note != null) ? note.toString() : null;
 
@@ -430,12 +469,13 @@ public class CartController {
             session.setAttribute("vnpay_address", address);
             session.setAttribute("vnpay_shipperId", shipperId);
             session.setAttribute("vnpay_note", customerNote);
+            session.setAttribute("vnpay_appliedCoupon", appliedCoupon); // Lưu coupon code sang session VNPay
 
             String txnRef = String.valueOf(System.currentTimeMillis());
             session.setAttribute("vnpay_txnRef", txnRef);
 
             String orderInfo = "Thanh toan don hang Trua Nay An Gi";
-            long amountInVnd = Math.round(totalPrice);
+            long amountInVnd = Math.round(grandTotal); // Số tiền thanh toán VNPay thực tế (đã tính discount)
 
             String vnpayUrl = vnPayService.createPaymentUrl(amountInVnd, txnRef, orderInfo, request);
             return "redirect:" + vnpayUrl;
@@ -453,7 +493,8 @@ public class CartController {
         order.setUser(currentUser);
         order.setRestaurant(restaurantOpt.get());
         order.setOrderStatus(status);
-        order.setTotalPrice(totalPrice);
+        order.setCoupon(coupon); // Gán coupon cho order
+        order.setTotalPrice(Math.max(0, totalPrice - discount) + serviceFee); // totalPrice = subtotal - discount + serviceFee
         order.setAddress(address);
         order.setShipper(shipper);
         order.setCustomerNote(customerNote);
@@ -507,19 +548,76 @@ public class CartController {
 
     @PostMapping("/apply-coupon")
     @ResponseBody
-    public ResponseEntity<?> applyCoupon(@RequestParam("couponCode") String couponCode, HttpSession session) {
+    public ResponseEntity<?> applyCoupon(@RequestParam("couponCode") String couponCode,
+                                         @RequestParam(name = "selectedItems", required = false) List<Long> selectedItemIds,
+                                         HttpSession session) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated()
                 && !(authentication instanceof AnonymousAuthenticationToken);
         if (!isAuthenticated) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Bạn cần đăng nhập để thực hiện."));
         }
+
         if (couponCode == null || couponCode.trim().isEmpty()) {
             session.removeAttribute("appliedCoupon");
-        } else {
-            session.setAttribute("appliedCoupon", couponCode.trim());
+            return ResponseEntity.ok(Map.of("success", true, "message", "Đã hủy áp dụng mã giảm giá."));
         }
-        return ResponseEntity.ok().build();
+
+        String username = authentication.getName();
+        User currentUser = userService.findByUsername(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Không tìm thấy thông tin tài khoản."));
+        }
+
+        // Lấy restaurantId
+        Long restaurantId = null;
+        List<CartItem> allCartItems = cartService.getCartItems(currentUser);
+        List<CartItem> targetItems = new ArrayList<>();
+        if (selectedItemIds != null && !selectedItemIds.isEmpty()) {
+            targetItems = allCartItems.stream()
+                    .filter(item -> selectedItemIds.contains(item.getId()))
+                    .collect(Collectors.toList());
+        } else {
+            targetItems = allCartItems;
+        }
+
+        if (targetItems.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Giỏ hàng của bạn đang trống hoặc không hợp lệ."));
+        }
+
+        restaurantId = targetItems.get(0).getDish().getRestaurant().getId();
+
+        // Tính subtotal
+        double subtotal = 0;
+        for (CartItem item : targetItems) {
+            if (item.getDish() != null) {
+                subtotal += item.getDish().getPrice() * item.getQuantity();
+            }
+        }
+
+        try {
+            var coupons = restaurantService.getCouponsByRestaurantId(restaurantId);
+            String cleanCode = couponCode.trim();
+            var matched = coupons.stream()
+                    .filter(c -> Boolean.TRUE.equals(c.getIsAvailable()))
+                    .filter(c -> c.getName() != null && c.getName().equalsIgnoreCase(cleanCode))
+                    .findFirst();
+
+            if (matched.isPresent()) {
+                var c = matched.get();
+                boolean minOk = c.getMinOrder() == null || subtotal >= c.getMinOrder();
+                if (minOk) {
+                    session.setAttribute("appliedCoupon", cleanCode);
+                    return ResponseEntity.ok(Map.of("success", true, "message", "Áp dụng mã giảm giá thành công."));
+                } else {
+                    return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Chưa đạt giá trị đơn hàng tối thiểu để áp dụng mã này (Tối thiểu " + Math.round(c.getMinOrder()) + " ₫)."));
+                }
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Mã giảm giá không hợp lệ hoặc không thuộc cửa hàng này."));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Có lỗi xảy ra khi kiểm tra mã giảm giá."));
+        }
     }
 
     @GetMapping("/count")
