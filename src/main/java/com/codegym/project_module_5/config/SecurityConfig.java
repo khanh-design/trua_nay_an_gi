@@ -81,6 +81,7 @@ public class SecurityConfig {
                         .requestMatchers("/chat/**").permitAll()
                         .requestMatchers("/cart/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
+                        .requestMatchers("/payment/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/restaurants/signup").authenticated()
                         .requestMatchers("/restaurants/**").hasAnyAuthority("OWNER", "ADMIN")

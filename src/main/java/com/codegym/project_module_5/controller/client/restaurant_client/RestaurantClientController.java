@@ -38,8 +38,9 @@ public class RestaurantClientController {
     public String showRestaurantDetails(@PathVariable Long id, Model model) {
         List<Dish> dishes = dishService.findByRestaurantId(id);
         Optional<Restaurant> restaurant = restaurantService.findById(id);
+        // Load all categories for the sidebar menu
         Iterable<Category> categories = categoryService.findAll();
-        Iterable<Evaluate> evaluates = evaluateService.findAll();
+        List<Evaluate> evaluates = evaluateService.findByRestaurantId(id);
         Dish bannerDish = null;
     if (restaurant.isPresent() && restaurant.get().getFeaturedDishId() != null) {
         Long featuredId = restaurant.get().getFeaturedDishId();

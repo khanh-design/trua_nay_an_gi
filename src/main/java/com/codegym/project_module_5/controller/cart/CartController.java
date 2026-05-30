@@ -1,21 +1,21 @@
 package com.codegym.project_module_5.controller.cart;
 
 import com.codegym.project_module_5.model.cart_model.CartItem;
-import com.codegym.project_module_5.model.order_model.OrderDetail;
-import com.codegym.project_module_5.model.order_model.OrderStatus;
-import com.codegym.project_module_5.model.order_model.Orders;
+import com.codegym.project_module_5.model.order_model.*;
 import com.codegym.project_module_5.model.restaurant_model.Dish;
-import com.codegym.project_module_5.model.shipper_model.Shipper; // Thêm import
+import com.codegym.project_module_5.model.shipper_model.Shipper;
 import com.codegym.project_module_5.model.user_model.User;
 import com.codegym.project_module_5.model.user_model.UserAddress;
 import com.codegym.project_module_5.repository.order_repository.IOrderStatusRepository;
 import com.codegym.project_module_5.service.cart_service.ICartService;
 import com.codegym.project_module_5.service.order_service.IOrderDetailService;
 import com.codegym.project_module_5.service.order_service.IOrderService;
+import com.codegym.project_module_5.service.payment.VNPayService;
 import com.codegym.project_module_5.service.restaurant_service.IDishService;
 import com.codegym.project_module_5.service.restaurant_service.IRestaurantService;
-import com.codegym.project_module_5.service.shipper_service.IShipperService; // Thêm import
+import com.codegym.project_module_5.service.shipper_service.IShipperService;
 import com.codegym.project_module_5.service.user_service.IUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +61,10 @@ public class CartController {
     private IOrderStatusRepository orderStatusRepository;
 
     @Autowired
-    private IShipperService shipperService; // <<< DÒNG MỚI
+    private IShipperService shipperService;
+
+    @Autowired
+    private VNPayService vnPayService;
 
     // ... (Các phương thức viewCart, removeCartItem, addToCart, checkout GET giữ nguyên)
 
@@ -344,7 +347,7 @@ public class CartController {
             return "redirect:/login";
         }
 
-        if (paymentMethod != null && (paymentMethod.equals("COD") || paymentMethod.equals("CARD"))) {
+        if (paymentMethod != null && (paymentMethod.equals("COD") || paymentMethod.equals("VNPAY"))) {
             session.setAttribute("paymentMethod", paymentMethod);
         } else {
             session.removeAttribute("paymentMethod");
@@ -367,8 +370,10 @@ public class CartController {
     @PostMapping("/place-order")
     public String placeOrder(@RequestParam(name = "selectedItems", required = false) List<Long> selectedItemIds,
                              @RequestParam("address") String address,
-                             @RequestParam("shipperId") Long shipperId, // <<< DÒNG MỚI
+                             @RequestParam("shipperId") Long shipperId,
+                             @RequestParam(name = "paymentMethod", defaultValue = "COD") String paymentMethodStr,
                              HttpSession session,
+                             HttpServletRequest request,
                              RedirectAttributes redirectAttributes) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated()
@@ -396,16 +401,13 @@ public class CartController {
             return "redirect:/cart";
         }
 
-        // === PHẦN THAY ĐỔI ===
         Optional<Shipper> shipperOpt = shipperService.findById(shipperId);
         if (shipperOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Đơn vị vận chuyển không hợp lệ.");
-            // Chuyển hướng trở lại trang chi tiết giỏ hàng với các mặt hàng đã chọn
             String params = selectedItemIds.stream().map(id -> "selectedItems=" + id).collect(Collectors.joining("&"));
             return "redirect:/cart/detail?" + params;
         }
         Shipper shipper = shipperOpt.get();
-        // === KẾT THÚC THAY ĐỔI ===
 
         Long restaurantId = itemsToOrder.get(0).getDish().getRestaurant().getId();
         var restaurantOpt = restaurantService.findById(restaurantId);
@@ -414,6 +416,32 @@ public class CartController {
             return "redirect:/cart/detail?" + params;
         }
 
+        double totalPrice = 0;
+        for (CartItem item : itemsToOrder) {
+            totalPrice += item.getDish().getPrice() * item.getQuantity();
+        }
+
+        Object note = session.getAttribute("orderNote");
+        String customerNote = (note != null) ? note.toString() : null;
+
+        // === VNPay Flow: Save data in session, redirect to VNPay gateway ===
+        if ("VNPAY".equals(paymentMethodStr)) {
+            session.setAttribute("vnpay_selectedItems", selectedItemIds);
+            session.setAttribute("vnpay_address", address);
+            session.setAttribute("vnpay_shipperId", shipperId);
+            session.setAttribute("vnpay_note", customerNote);
+
+            String txnRef = String.valueOf(System.currentTimeMillis());
+            session.setAttribute("vnpay_txnRef", txnRef);
+
+            String orderInfo = "Thanh toan don hang Trua Nay An Gi";
+            long amountInVnd = Math.round(totalPrice);
+
+            String vnpayUrl = vnPayService.createPaymentUrl(amountInVnd, txnRef, orderInfo, request);
+            return "redirect:" + vnpayUrl;
+        }
+
+        // === COD Flow: Create order immediately ===
         OrderStatus status = orderStatusRepository.findByName("Chờ xác nhận")
                 .orElseGet(() -> {
                     OrderStatus s = new OrderStatus();
@@ -421,20 +449,16 @@ public class CartController {
                     return orderStatusRepository.save(s);
                 });
 
-        double totalPrice = 0;
-        for (CartItem item : itemsToOrder) {
-            totalPrice += item.getDish().getPrice() * item.getQuantity();
-        }
-
         Orders order = new Orders();
         order.setUser(currentUser);
         order.setRestaurant(restaurantOpt.get());
         order.setOrderStatus(status);
-        order.setTotalPrice(totalPrice); // Lưu ý: totalPrice này là tổng tiền hàng, chưa bao gồm phí ship và các phí khác
+        order.setTotalPrice(totalPrice);
         order.setAddress(address);
-        order.setShipper(shipper); // <<< DÒNG MỚI
-        Object note = session.getAttribute("orderNote");
-        if (note != null) order.setCustomerNote(note.toString());
+        order.setShipper(shipper);
+        order.setCustomerNote(customerNote);
+        order.setPaymentMethod(PaymentMethod.COD);
+        order.setPaymentStatus(PaymentStatus.UNPAID);
         orderService.save(order);
 
         for (CartItem ci : itemsToOrder) {
@@ -446,14 +470,14 @@ public class CartController {
             orderDetailService.save(od);
         }
 
-        for(CartItem item : itemsToOrder) {
+        for (CartItem item : itemsToOrder) {
             cartService.removeCartItem(item.getId());
         }
 
         session.removeAttribute("paymentMethod");
         session.removeAttribute("orderNote");
         session.removeAttribute("appliedCoupon");
-        session.removeAttribute("selectedShipperId"); // Xóa shipper đã chọn khỏi session
+        session.removeAttribute("selectedShipperId");
 
         redirectAttributes.addFlashAttribute("successMessage", "Cảm ơn bạn đã tin tưởng và đặt hàng.");
         return "redirect:/cart/order-success?orderId=" + order.getId();

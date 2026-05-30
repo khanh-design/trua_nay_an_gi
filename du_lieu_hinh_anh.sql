@@ -527,5 +527,99 @@ UPDATE `casestudy`.`dish` SET `picture_url` = 'healthy/green_detox.jpg'         
 UPDATE `casestudy`.`dish` SET `picture_url` = 'healthy/smoothie_yen_mach_bo.jpg'  WHERE id = 50;
 
 
+-- ============================================================
+-- DỮ LIỆU MẪU: ĐÁNH GIÁ NHÀ HÀNG (evaluate)
+-- ============================================================
 
+-- Nhà hàng 1 - Hải Sản Biển Đông
+INSERT INTO evaluate (comment, star, response_rate, response_time, followers, outstanding_features, product_quality, user_id, restaurant_id) VALUES
+('Hải sản cực tươi, cua rang me ăn đậm đà lắm, chắc chắn sẽ quay lại!', 5, 'cao', 'nhanh', NOW(), 'Hải sản tươi sống', 'Xuất sắc', 4, 1),
+('Tôm hùm nướng muối ớt rất ngon, phục vụ nhiệt tình, giá hơi cao nhưng xứng đáng.', 4, 'trung bình', 'nhanh', NOW(), 'Phục vụ tốt', 'Tốt', 1, 1),
+('Không gian sạch sẽ, món ăn chất lượng, mực xào chua ngọt giòn và đậm vị.', 5, 'cao', 'nhanh', NOW(), 'Không gian đẹp', 'Xuất sắc', 2, 1),
+('Gỏi cá trích tươi ngon, nước mắm chua ngọt pha đúng vị, nhân viên thân thiện.', 4, 'cao', 'trung bình', NOW(), 'Thân thiện', 'Tốt', 3, 1),
+('Lẩu hải sản thập cẩm đáng tiền, nguyên liệu tươi, nước dùng ngọt tự nhiên.', 5, 'cao', 'nhanh', NOW(), 'Lẩu đặc biệt', 'Xuất sắc', 4, 1);
+
+-- Nhà hàng 2 - Cơm Tấm Sài Gòn
+INSERT INTO evaluate (comment, star, response_rate, response_time, followers, outstanding_features, product_quality, user_id, restaurant_id) VALUES
+('Cơm tấm sườn nướng thơm lừng, đúng vị Sài Gòn, giá bình dân dễ ăn.', 5, 'cao', 'nhanh', NOW(), 'Đúng vị truyền thống', 'Xuất sắc', 4, 2),
+('Phở bò tái nước dùng trong, bò mềm ngon, sẽ ghé lại thường xuyên.', 4, 'cao', 'nhanh', NOW(), 'Nước dùng đậm đà', 'Tốt', 1, 2),
+('Bún bò Huế cay vừa miệng, chả cua thơm, phục vụ nhanh thoáng.', 5, 'trung bình', 'nhanh', NOW(), 'Cay đúng vị', 'Xuất sắc', 3, 2),
+('Cơm tấm gà nướng da giòn, thịt mềm, nước mắm pha rất ngon.', 4, 'cao', 'trung bình', NOW(), 'Gà nướng giòn', 'Tốt', 4, 2),
+('Mì Quảng gà sợi dai, nhân đầy đặn, nước dùng sệt đặc trưng.', 5, 'cao', 'nhanh', NOW(), 'Đặc sản miền Trung', 'Xuất sắc', 2, 2);
+
+-- Nhà hàng 3 - Milktea House
+INSERT INTO evaluate (comment, star, response_rate, response_time, followers, outstanding_features, product_quality, user_id, restaurant_id) VALUES
+('Trà sữa trân châu đường đen dẻo thơm, vị trà đậm vừa phải, rất thích!', 5, 'cao', 'nhanh', NOW(), 'Trân châu dẻo thơm', 'Xuất sắc', 4, 3),
+('Trà sữa matcha thơm, không quá ngọt, nhân viên vui vẻ nhiệt tình.', 4, 'cao', 'nhanh', NOW(), 'Matcha chuẩn vị', 'Tốt', 1, 3),
+('Sinh tố bơ sữa béo ngậy mịn màng, size lớn, giá hợp lý.', 5, 'trung bình', 'nhanh', NOW(), 'Bơ hảo hạng', 'Xuất sắc', 3, 3),
+('Trà đào cam sả mát lạnh rất giải nhiệt, hương thơm tự nhiên dễ chịu.', 4, 'cao', 'nhanh', NOW(), 'Thanh mát', 'Tốt', 2, 3);
+
+-- ============================================================
+-- 2 NHÀ HÀNG MỚI: PHỞ BẮC THÀNH + BBQ GARDEN
+-- ============================================================
+
+INSERT INTO user (username, password, email, phone, full_name, avatar_url) VALUES
+('owner3', '$2a$12$/NmbZs9tWCi7dPaF46ynseIsAaR6STGCA87SYHV3Ln.TdKJ/DZlVC', 'owner3@restaurant.com', '0123456792', 'Chủ nhà hàng 3', NULL),
+('owner4', '$2a$12$/NmbZs9tWCi7dPaF46ynseIsAaR6STGCA87SYHV3Ln.TdKJ/DZlVC', 'owner4@restaurant.com', '0123456793', 'Chủ nhà hàng 4', NULL);
+
+INSERT INTO user_roles (user_id, role_id) SELECT id, 2 FROM user WHERE username IN ('owner3','owner4');
+
+-- Nhà hàng 4: Phở Bắc Thành
+INSERT INTO restaurant (name, user_id, address, phone, logo_url, description, is_long_term_partner, is_open, is_locked, is_approved)
+SELECT 'Phở Bắc Thành', id, '88 Đinh Tiên Hoàng, Quận Bình Thạnh, TP.HCM', '0901234569',
+       'logo/logo.jpg', 'Phở truyền thống Hà Nội chính gốc, nước dùng hầm xương bò 12 giờ, phục vụ từ 6h sáng đến 22h',
+       true, true, false, true FROM user WHERE username = 'owner3';
+
+-- Nhà hàng 5: BBQ Garden
+INSERT INTO restaurant (name, user_id, address, phone, logo_url, description, is_long_term_partner, is_open, is_locked, is_approved)
+SELECT 'BBQ Garden', id, '15 Nguyễn Huệ, Quận 1, TP.HCM', '0901234570',
+       'logo/logo.jpg', 'Nhà hàng nướng lẩu phong cách Hàn Quốc, không gian rộng rãi, phù hợp nhóm bạn và gia đình',
+       true, true, false, true FROM user WHERE username = 'owner4';
+
+-- Tags
+INSERT INTO tag (name, restaurant_id) VALUES
+('Truyền thống', 4), ('Nước dùng đặc biệt', 4), ('Bán chạy', 4),
+('Nướng Hàn Quốc', 5), ('All-you-can-eat', 5), ('Nhóm bạn', 5);
+
+-- Món ăn nhà hàng 4 (Phở)
+INSERT INTO dish (name, restaurant_id, price, description, picture_url, tag_id, baner, is_available, category_id) VALUES
+('Phở bò tái chín', 4, 70000, 'Phở bò truyền thống với tái và chín, nước dùng trong vắt hầm xương bò 12h', 'eat_food/pho-bo-tai.jpg', 12, false, true, 2),
+('Phở gà ta', 4, 65000, 'Phở gà nấu từ gà ta thả vườn, nước dùng ngọt nhẹ và thơm', 'eat_food/pho-bo-tai.jpg', 13, false, true, 2),
+('Phở đặc biệt (tái, nạm, gầu, gân)', 4, 90000, 'Phở bò đặc biệt đầy đủ các loại thịt, thích hợp cho người ăn nhiều', 'eat_food/pho-bo-tai.jpg', 14, false, true, 2),
+('Quẩy giòn', 4, 15000, 'Quẩy chiên vàng giòn ăn kèm phở', 'eat_food/sup_hai_san.jpg', 12, false, true, 2),
+('Nước xương hầm', 4, 20000, 'Nước xương bò hầm nguyên chất, bổ dưỡng', 'eat_food/sup_hai_san.jpg', 13, false, true, 2);
+
+-- Món ăn nhà hàng 5 (BBQ)
+INSERT INTO dish (name, restaurant_id, price, description, picture_url, tag_id, baner, is_available, category_id) VALUES
+('Thịt ba chỉ nướng Hàn Quốc', 5, 199000, 'Thịt ba chỉ heo tươi ngon nướng trực tiếp trên bếp than, ăn kèm rau sống và sốt đặc biệt', 'eat_food/ca_hoi_nuong_la_chuoi.jpg', 15, false, true, 5),
+('Bò Wagyu nướng', 5, 350000, 'Bò Wagyu thượng hạng, thịt mềm tan trong miệng', 'eat_food/tom_hung_nuong.jpg', 16, false, true, 4),
+('Combo lẩu Hàn Quốc (2 người)', 5, 450000, 'Lẩu kim chi cay nồng với bò mỹ, hải sản, nấm và rau củ', 'eat_food/lau_hai_san.jpg', 17, false, true, 4),
+('Gà nướng sốt teriyaki', 5, 165000, 'Gà nướng sốt teriyaki ngọt thơm, da giòn thịt mềm', 'eat_food/ga-nuong-la-tranh.jpg', 15, false, true, 5),
+('Mì lạnh Hàn Quốc (Naengmyeon)', 5, 95000, 'Mì lạnh kiều mạch truyền thống, nước dùng lạnh chua ngọt', 'eat_food/bun-cha-ca.jpg', 16, false, true, 3);
+
+-- Đánh giá nhà hàng 4 (Phở Bắc Thành)
+INSERT INTO evaluate (comment, star, response_rate, response_time, followers, outstanding_features, product_quality, user_id, restaurant_id)
+SELECT 'Phở nước dùng trong ngọt tự nhiên, không bột ngọt, ăn xong không khát nước.', 5, 'cao', 'nhanh', NOW(), 'Nước dùng sạch', 'Xuất sắc', 4, id 
+FROM restaurant WHERE name = 'Phở Bắc Thành' LIMIT 1;
+
+INSERT INTO evaluate (comment, star, response_rate, response_time, followers, outstanding_features, product_quality, user_id, restaurant_id)
+SELECT 'Phở đặc biệt đủ loại thịt, bò mềm, quẩy giòn rất ngon.', 4, 'cao', 'nhanh', NOW(), 'Đủ topping', 'Tốt', 1, id 
+FROM restaurant WHERE name = 'Phở Bắc Thành' LIMIT 1;
+
+INSERT INTO evaluate (comment, star, response_rate, response_time, followers, outstanding_features, product_quality, user_id, restaurant_id)
+SELECT 'Giá hợp lý, phục vụ nhanh, không gian sạch sẽ thoáng mát.', 5, 'trung bình', 'nhanh', NOW(), 'Vệ sinh tốt', 'Xuất sắc', 3, id 
+FROM restaurant WHERE name = 'Phở Bắc Thành' LIMIT 1;
+
+-- Đánh giá nhà hàng 5 (BBQ Garden)
+INSERT INTO evaluate (comment, star, response_rate, response_time, followers, outstanding_features, product_quality, user_id, restaurant_id)
+SELECT 'Thịt ba chỉ nướng rất thơm, không bị khô, sốt chấm đặc biệt ngon tuyệt.', 5, 'cao', 'nhanh', NOW(), 'Thịt tươi ngon', 'Xuất sắc', 4, id 
+FROM restaurant WHERE name = 'BBQ Garden' LIMIT 1;
+
+INSERT INTO evaluate (comment, star, response_rate, response_time, followers, outstanding_features, product_quality, user_id, restaurant_id)
+SELECT 'Bò Wagyu tan trong miệng, trải nghiệm ăn uống sang trọng, đáng đồng tiền.', 5, 'cao', 'nhanh', NOW(), 'Thịt Wagyu cao cấp', 'Xuất sắc', 2, id 
+FROM restaurant WHERE name = 'BBQ Garden' LIMIT 1;
+
+INSERT INTO evaluate (comment, star, response_rate, response_time, followers, outstanding_features, product_quality, user_id, restaurant_id)
+SELECT 'Không gian rộng rãi, nhân viên nhiệt tình, combo lẩu Hàn rất đáng thử.', 4, 'cao', 'trung bình', NOW(), 'Không gian sang', 'Tốt', 3, id 
+FROM restaurant WHERE name = 'BBQ Garden' LIMIT 1;
 

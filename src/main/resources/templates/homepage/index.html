@@ -459,30 +459,158 @@
     </li>
   </ul>
 </nav>
-<footer class="mt-5 bg-light pt-4 pb-4 border-top" th:fragment="home_footer">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-3">
-        <h6>Công ty</h6>
-        <ul class="list-unstyled small">
-          <li>Giới thiệu</li>
-          <li>Trung tâm Trợ giúp</li>
-          <li>Quy chế</li>
-          <li>Điều khoản sử dụng</li>
-          <li>Bảo mật thông tin</li>
-        </ul>
+<footer th:fragment="home_footer" style="margin-top:4rem;">
+
+  <!-- Wave divider -->
+  <div style="line-height:0; overflow:hidden;">
+    <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+         style="display:block; width:100%; height:60px;">
+      <path d="M0,30 C360,70 1080,-10 1440,30 L1440,60 L0,60 Z"
+            fill="#ee4d2d"/>
+    </svg>
+  </div>
+
+  <!-- Main footer body -->
+  <div style="background: linear-gradient(135deg, #ee4d2d 0%, #d63b1f 60%, #c0392b 100%); color:#fff; padding: 3rem 0 1.5rem;">
+    <div class="container">
+      <div class="row g-4">
+
+        <!-- Cột 1: Brand -->
+        <div class="col-lg-4 col-md-6">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:1rem;">
+            <img src="/images/logo/logo_thiet_ke.png" alt="Logo"
+                 style="width:48px; height:48px; border-radius:50%; border:2px solid rgba(255,255,255,0.4); object-fit:cover;">
+            <span style="font-size:1.4rem; font-weight:800; letter-spacing:-0.5px;">FoodDelivery</span>
+          </div>
+          <p style="font-size:0.875rem; color:rgba(255,255,255,0.82); line-height:1.7; margin-bottom:1.2rem;">
+            Nền tảng giao đồ ăn hàng đầu Việt Nam. Hàng nghìn nhà hàng — giao tận nơi nhanh chóng!
+          </p>
+          <!-- Social icons -->
+          <div style="display:flex; gap:10px;">
+            <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);
+               display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;
+               transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+               onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+              <i class="fab fa-facebook-f" style="font-size:.85rem;"></i>
+            </a>
+            <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);
+               display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;
+               transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+               onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+              <i class="fab fa-instagram" style="font-size:.85rem;"></i>
+            </a>
+            <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);
+               display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;
+               transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+               onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+              <i class="fab fa-youtube" style="font-size:.85rem;"></i>
+            </a>
+            <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);
+               display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;
+               transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+               onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+              <i class="fab fa-tiktok" style="font-size:.85rem;"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Cột 2: Liên kết -->
+        <div class="col-lg-2 col-md-6 col-6">
+          <h6 style="font-weight:700; font-size:0.8rem; letter-spacing:1.5px; text-transform:uppercase;
+                     color:rgba(255,255,255,0.6); margin-bottom:1rem;">Công ty</h6>
+          <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">
+            <li><a href="#" style="color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.875rem;
+                   transition:color .2s;" onmouseover="this.style.color='#fff'"
+                   onmouseout="this.style.color='rgba(255,255,255,0.85)'">Giới thiệu</a></li>
+            <li><a href="#" style="color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.875rem;
+                   transition:color .2s;" onmouseover="this.style.color='#fff'"
+                   onmouseout="this.style.color='rgba(255,255,255,0.85)'">Trung tâm trợ giúp</a></li>
+            <li><a href="#" style="color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.875rem;
+                   transition:color .2s;" onmouseover="this.style.color='#fff'"
+                   onmouseout="this.style.color='rgba(255,255,255,0.85)'">Quy chế hoạt động</a></li>
+            <li><a href="#" style="color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.875rem;
+                   transition:color .2s;" onmouseover="this.style.color='#fff'"
+                   onmouseout="this.style.color='rgba(255,255,255,0.85)'">Điều khoản sử dụng</a></li>
+            <li><a href="#" style="color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.875rem;
+                   transition:color .2s;" onmouseover="this.style.color='#fff'"
+                   onmouseout="this.style.color='rgba(255,255,255,0.85)'">Bảo mật thông tin</a></li>
+          </ul>
+        </div>
+
+        <!-- Cột 3: Hỗ trợ -->
+        <div class="col-lg-2 col-md-6 col-6">
+          <h6 style="font-weight:700; font-size:0.8rem; letter-spacing:1.5px; text-transform:uppercase;
+                     color:rgba(255,255,255,0.6); margin-bottom:1rem;">Hỗ trợ</h6>
+          <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">
+            <li><a href="/home" style="color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.875rem;
+                   transition:color .2s;" onmouseover="this.style.color='#fff'"
+                   onmouseout="this.style.color='rgba(255,255,255,0.85)'">Trang chủ</a></li>
+            <li><a href="/cart" style="color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.875rem;
+                   transition:color .2s;" onmouseover="this.style.color='#fff'"
+                   onmouseout="this.style.color='rgba(255,255,255,0.85)'">Giỏ hàng</a></li>
+            <li><a href="/chat" style="color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.875rem;
+                   transition:color .2s;" onmouseover="this.style.color='#fff'"
+                   onmouseout="this.style.color='rgba(255,255,255,0.85)'">Tư vấn dinh dưỡng</a></li>
+            <li><a href="#" style="color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.875rem;
+                   transition:color .2s;" onmouseover="this.style.color='#fff'"
+                   onmouseout="this.style.color='rgba(255,255,255,0.85)'">Liên hệ</a></li>
+          </ul>
+        </div>
+
+        <!-- Cột 4: Tải app -->
+        <div class="col-lg-4 col-md-6">
+          <h6 style="font-weight:700; font-size:0.8rem; letter-spacing:1.5px; text-transform:uppercase;
+                     color:rgba(255,255,255,0.6); margin-bottom:1rem;">Tải ứng dụng</h6>
+          <p style="font-size:0.8rem; color:rgba(255,255,255,0.75); margin-bottom:0.75rem;">
+            Đặt đồ ăn nhanh hơn với ứng dụng di động!
+          </p>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <a href="#" style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.12);
+               border:1px solid rgba(255,255,255,0.25); border-radius:10px; padding:9px 14px;
+               text-decoration:none; color:#fff; transition:background .2s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.22)'"
+               onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+              <i class="fab fa-apple" style="font-size:1.5rem;"></i>
+              <div>
+                <div style="font-size:0.65rem; opacity:0.8;">Tải trên</div>
+                <div style="font-size:0.9rem; font-weight:700;">App Store</div>
+              </div>
+            </a>
+            <a href="#" style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.12);
+               border:1px solid rgba(255,255,255,0.25); border-radius:10px; padding:9px 14px;
+               text-decoration:none; color:#fff; transition:background .2s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.22)'"
+               onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+              <i class="fab fa-google-play" style="font-size:1.4rem;"></i>
+              <div>
+                <div style="font-size:0.65rem; opacity:0.8;">Tải trên</div>
+                <div style="font-size:0.9rem; font-weight:700;">Google Play</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
       </div>
-      <div class="col-md-3">
-        <h6>Ứng dụng FoodDelivery</h6>
-        <div class="d-flex gap-2">
-          <img src="/images/logo/appstore.png" alt="App Store" height="40">
-          <img src="/images/logo/googleplay.png" alt="Google Play" height="40">
+
+      <!-- Divider -->
+      <div style="border-top:1px solid rgba(255,255,255,0.15); margin-top:2.5rem; padding-top:1.25rem;
+                  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px;">
+        <p style="margin:0; font-size:0.8rem; color:rgba(255,255,255,0.65);">
+          © 2025 <strong style="color:#fff;">FoodDelivery</strong> — Công ty CP Foody
+          &bull; 244 Cống Quỳnh, P. Phạm Ngũ Lão, Q.1, TP.HCM
+        </p>
+        <div style="display:flex; gap:16px;">
+          <a href="#" style="font-size:0.78rem; color:rgba(255,255,255,0.65); text-decoration:none;"
+             onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">
+            Chính sách bảo mật
+          </a>
+          <a href="#" style="font-size:0.78rem; color:rgba(255,255,255,0.65); text-decoration:none;"
+             onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">
+            Điều khoản
+          </a>
         </div>
       </div>
-      <div class="col-md-6 text-end small">
-        <p>FoodDelivery © 2025</p>
-        <p>Công ty CP Foody - Địa chỉ: 244 Cống Quỳnh, P. Phạm Ngũ Lão, Q.1, TP.HCM</p>
-      </div>
+
     </div>
   </div>
 </footer>
@@ -576,6 +704,7 @@
 </script>
 
 <!-- ===== CHAT BUBBLE ===== -->
+<div th:fragment="chat_bubble">
 <style>
   /* === FAB Button === */
   #chat-fab {
@@ -972,23 +1101,78 @@
   const startChatBtn     = document.getElementById('start-chat-btn');
   const cbInputContainer = document.getElementById('cb-input-container');
 
-  let healthProfileSaved = false;
+  // ===== SESSION STORAGE KEYS =====
+  const STORAGE_MESSAGES  = 'chat_messages';
+  const STORAGE_HEALTH    = 'chat_health_profile';
+  const STORAGE_CHAT_MODE = 'chat_mode'; // 'form' | 'results' | 'chat'
 
-  function togglePanel() {
-    const isOpen = panel.classList.toggle('open');
-    fab.classList.toggle('open', isOpen);
-    cbBadge.style.display = 'none';
-    if (isOpen && !healthProfileSaved) {
+  // ===== LOAD STATE =====
+  let chatMessages = JSON.parse(sessionStorage.getItem(STORAGE_MESSAGES) || '[]');
+  let savedHealth  = JSON.parse(sessionStorage.getItem(STORAGE_HEALTH) || 'null');
+  let chatMode     = sessionStorage.getItem(STORAGE_CHAT_MODE) || 'form';
+  let healthProfileSaved = savedHealth !== null;
+
+  function saveMessages() {
+    sessionStorage.setItem(STORAGE_MESSAGES, JSON.stringify(chatMessages));
+  }
+
+  function saveHealth(data) {
+    savedHealth = data;
+    sessionStorage.setItem(STORAGE_HEALTH, JSON.stringify(data));
+  }
+
+  function setChatMode(mode) {
+    chatMode = mode;
+    sessionStorage.setItem(STORAGE_CHAT_MODE, mode);
+  }
+
+  // ===== RESTORE UI STATE =====
+  function restoreState() {
+    if (chatMode === 'chat' && healthProfileSaved) {
+      healthFormBox.style.display = 'none';
+      healthResults.style.display = 'none';
+      cbWindow.style.display = 'block';
+      cbInputContainer.style.display = 'flex';
+      // Clear DOM trước khi restore tránh trùng lặp
+      cbWindow.innerHTML = '';
+      // Restore messages
+      chatMessages.forEach(m => renderMsg(m.role, m.text));
+      cbWindow.scrollTop = cbWindow.scrollHeight;
+    } else if (chatMode === 'results' && savedHealth) {
+      healthFormBox.style.display = 'none';
+      healthResults.style.display = 'block';
+      cbWindow.style.display = 'none';
+      cbInputContainer.style.display = 'none';
+      // Restore health results
+      document.getElementById('res-bmi').textContent = savedHealth.bmi;
+      document.getElementById('res-bmi-cat').textContent = savedHealth.bmiCategory;
+      document.getElementById('res-bmr').textContent = Math.round(savedHealth.bmr);
+      document.getElementById('res-tdee').textContent = Math.round(savedHealth.tdee);
+      document.getElementById('res-target').textContent = Math.round(savedHealth.targetCalories);
+    } else {
       healthFormBox.style.display = 'block';
       cbWindow.style.display = 'none';
       cbInputContainer.style.display = 'none';
     }
   }
 
+  // ===== TOGGLE PANEL =====
+  function togglePanel() {
+    const isOpen = panel.classList.toggle('open');
+    fab.classList.toggle('open', isOpen);
+    cbBadge.style.display = 'none';
+    if (isOpen) {
+      restoreState();
+      if (chatMode === 'chat') {
+        setTimeout(() => cbInput.focus(), 200);
+      }
+    }
+  }
+
   fab.addEventListener('click', togglePanel);
   closeBtn.addEventListener('click', togglePanel);
 
-  // Health form submit
+  // ===== HEALTH FORM SUBMIT =====
   healthForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     const submitBtn = document.getElementById('hf-submit');
@@ -1021,6 +1205,10 @@
         healthFormBox.style.display = 'none';
         healthResults.style.display = 'block';
         healthProfileSaved = true;
+
+        // Lưu vào sessionStorage
+        saveHealth(data);
+        setChatMode('results');
       } else {
         alert('Lỗi: ' + (data.error || 'Không xác định'));
       }
@@ -1032,34 +1220,46 @@
     }
   });
 
-  // Start chat after seeing results
+  // ===== START CHAT =====
   startChatBtn.addEventListener('click', function() {
     healthResults.style.display = 'none';
     cbWindow.style.display = 'block';
     cbInputContainer.style.display = 'flex';
-    appendWelcome();
+    setChatMode('chat');
+
+    // Chỉ thêm welcome nếu chưa có message
+    if (chatMessages.length === 0) {
+      addMessage('welcome', 'Chỉ số của bạn đã được ghi nhận! Hãy hỏi tôi về chế độ ăn phù hợp, ví dụ: "Gợi ý thực đơn 3 bữa hôm nay"');
+    }
     setTimeout(() => cbInput.focus(), 100);
   });
 
-  function appendWelcome() {
-    const el = document.createElement('div');
-    el.className = 'cb-welcome';
-    el.innerHTML = '<i class="fas fa-utensils"></i><span>Chỉ số của bạn đã được ghi nhận! Hãy hỏi tôi về chế độ ăn phù hợp, ví dụ: "Gợi ý thực đơn 3 bữa hôm nay"</span>';
-    cbWindow.appendChild(el);
+  // ===== MESSAGE FUNCTIONS =====
+  function addMessage(role, text) {
+    chatMessages.push({ role, text });
+    saveMessages();
+    renderMsg(role, text);
   }
 
-  function appendMsg(role, text) {
-    const wrap   = document.createElement('div');
-    wrap.className = `cb-msg ${role}`;
-    const label  = document.createElement('div');
-    label.className = 'cb-label';
-    label.textContent = role === 'user' ? 'Bạn' : 'Trợ lý';
-    const bubble = document.createElement('div');
-    bubble.className = 'cb-bubble';
-    bubble.textContent = text;
-    wrap.appendChild(label);
-    wrap.appendChild(bubble);
-    cbWindow.appendChild(wrap);
+  function renderMsg(role, text) {
+    if (role === 'welcome') {
+      const el = document.createElement('div');
+      el.className = 'cb-welcome';
+      el.innerHTML = '<i class="fas fa-utensils"></i><span>' + text + '</span>';
+      cbWindow.appendChild(el);
+    } else {
+      const wrap   = document.createElement('div');
+      wrap.className = `cb-msg ${role}`;
+      const label  = document.createElement('div');
+      label.className = 'cb-label';
+      label.textContent = role === 'user' ? 'Bạn' : 'Trợ lý';
+      const bubble = document.createElement('div');
+      bubble.className = 'cb-bubble';
+      bubble.textContent = text;
+      wrap.appendChild(label);
+      wrap.appendChild(bubble);
+      cbWindow.appendChild(wrap);
+    }
     cbWindow.scrollTop = cbWindow.scrollHeight;
   }
 
@@ -1090,11 +1290,12 @@
     cbError.textContent = '';
   }
 
+  // ===== SEND MESSAGE =====
   async function sendMessage() {
     const text = cbInput.value.trim();
     if (!text) return;
     clearError();
-    appendMsg('user', text);
+    addMessage('user', text);
     cbInput.value = '';
     cbSend.disabled = true;
     showTyping();
@@ -1104,14 +1305,15 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           request:  text,
-          goal:     document.getElementById('hf-goal')?.value || 'maintain',
+          goal:     document.getElementById('hf-goal')?.value || savedHealth?.hp_goal || 'maintain',
           diseases: []
         })
       });
       removeTyping();
       if (!res.ok) throw new Error(`Lỗi ${res.status}`);
       const data = await res.json();
-      appendMsg('bot', data.response ?? 'Không có phản hồi.');
+      const botText = data.response ?? 'Không có phản hồi.';
+      addMessage('bot', botText);
     } catch (err) {
       removeTyping();
       showError('Lỗi kết nối: ' + err.message);
@@ -1134,6 +1336,7 @@
   }, 3000);
 })();
 </script>
+</div>
 <!-- ===== /CHAT BUBBLE ===== -->
 
 </body>
