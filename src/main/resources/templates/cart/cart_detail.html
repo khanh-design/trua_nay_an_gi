@@ -65,6 +65,7 @@
         <input type="hidden" name="address" id="selectedAddressValue" th:if="${addressList != null and !addressList.isEmpty()}" th:value="${addressList[0].fullAddress}" />
 
         <input type="hidden" name="shipperId" id="selected_shipper_id" />
+        <input type="hidden" name="paymentMethod" id="selected_payment_method" value="COD" />
 
         <div class="row g-4">
             <div class="col-lg-8">
@@ -145,6 +146,32 @@
                             <a th:href="@{/user/addresses/add}" class="btn btn-shoppee-outline w-100">
                                 <i class="fas fa-plus me-1"></i>Thêm địa chỉ mới
                             </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header"><h5 class="mb-0"><i class="fas fa-credit-card me-2 text-info"></i>Phương thức thanh toán</h5></div>
+                    <div class="card-body">
+                        <div class="form-check mb-3 p-3 rounded border payment-option selected" id="payment-option-cod" style="cursor:pointer;">
+                            <input class="form-check-input payment-radio" type="radio" name="paymentRadio" id="payment-cod" value="COD" checked style="margin-top: 6px;">
+                            <label class="form-check-label d-flex align-items-center w-100" for="payment-cod" style="cursor:pointer;">
+                                <i class="fas fa-money-bill-wave me-3 text-success" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <strong>Thanh toán khi nhận hàng</strong>
+                                    <br><small class="text-muted">Thanh toán bằng tiền mặt cho shipper</small>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="form-check p-3 rounded border payment-option" id="payment-option-vnpay" style="cursor:pointer;">
+                            <input class="form-check-input payment-radio" type="radio" name="paymentRadio" id="payment-vnpay" value="VNPAY" style="margin-top: 6px;">
+                            <label class="form-check-label d-flex align-items-center w-100" for="payment-vnpay" style="cursor:pointer;">
+                                <span class="me-3" style="font-size: 1.5rem; font-weight: bold; color: #0066b3;">VN</span>
+                                <div>
+                                    <strong>Thanh toán qua VNPay</strong>
+                                    <br><small class="text-muted">Chuyển khoản ngân hàng, QR Code, Ví VNPay</small>
+                                </div>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -282,6 +309,44 @@
 
         // Chạy lần đầu khi tải trang để đảm bảo giá trị đúng
         updateTotals();
+
+        // --- Payment Method Logic ---
+        const paymentRadios = document.querySelectorAll('.payment-radio');
+        const selectedPaymentInput = document.getElementById('selected_payment_method');
+        const submitBtn = document.querySelector('#order-form button[type="submit"]');
+
+        paymentRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                selectedPaymentInput.value = this.value;
+
+                // Update visual selection
+                document.querySelectorAll('.payment-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                    opt.style.borderColor = '#e0e0e0';
+                    opt.style.backgroundColor = 'white';
+                });
+                const parentOption = this.closest('.payment-option');
+                if (parentOption) {
+                    parentOption.classList.add('selected');
+                    parentOption.style.borderColor = '#EE4D2D';
+                    parentOption.style.backgroundColor = 'rgba(238, 77, 45, 0.05)';
+                }
+
+                // Update button text
+                if (this.value === 'VNPAY') {
+                    submitBtn.innerHTML = '<i class="fas fa-university me-2"></i>Thanh toán qua VNPay';
+                } else {
+                    submitBtn.innerHTML = '<i class="fas fa-credit-card me-2"></i>Đặt hàng';
+                }
+            });
+        });
+
+        // Set initial visual state
+        const defaultOption = document.getElementById('payment-option-cod');
+        if (defaultOption) {
+            defaultOption.style.borderColor = '#EE4D2D';
+            defaultOption.style.backgroundColor = 'rgba(238, 77, 45, 0.05)';
+        }
     });
 </script>
 
