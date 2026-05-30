@@ -84,7 +84,14 @@
                             <p><strong>Mô tả:</strong> <span th:text="${r.description}"></span></p>
                             <div th:if="${r.logoUrl}">
                                 <strong>Logo:</strong><br>
-                                <img th:src="${r.logoUrl}" alt="Logo" class="img-fluid" style="max-height: 150px;">
+                                <img th:src="${r.logoUrl == null || r.logoUrl == ''} ? '/images/logo/logo.jpg' : 
+                                             (${r.logoUrl == '/images/logo.jpg'} ? 
+                                                (${r.id == 1} ? '/images/logo/restaurant/nha-hang-bien-dong.jpg' : 
+                                                 (${r.id == 2} ? '/images/logo/restaurant/com-tam-sai-gon.png' : 
+                                                  (${r.id == 3} ? '/images/logo/restaurant/tra-sua-milktea.png' : '/images/logo/logo.jpg'))) : 
+                                                (${r.logoUrl.startsWith('/images/')} ? ${r.logoUrl} : 
+                                                 (${r.logoUrl.contains('/')} ? ${r.logoUrl} : '/images/logo/' + ${r.logoUrl})))" 
+                                     alt="Logo" class="img-fluid" style="max-height: 150px;">
                             </div>
                         </div>
                         <div class="modal-footer">

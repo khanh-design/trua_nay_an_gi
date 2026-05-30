@@ -155,7 +155,13 @@
 
     <!-- Cột trái: THÔNG TIN NHÀ HÀNG với nền trắng -->
     <div class="store-info-box">
-        <img th:src="@{'/images/logo/' + ${restaurant.logoUrl}}"
+        <img th:src="${restaurant.logoUrl == null || restaurant.logoUrl == ''} ? '/images/logo/logo.jpg' : 
+                     (${restaurant.logoUrl == '/images/logo.jpg'} ? 
+                        (${restaurant.id == 1} ? '/images/logo/restaurant/nha-hang-bien-dong.jpg' : 
+                         (${restaurant.id == 2} ? '/images/logo/restaurant/com-tam-sai-gon.png' : 
+                          (${restaurant.id == 3} ? '/images/logo/restaurant/tra-sua-milktea.png' : '/images/logo/logo.jpg'))) : 
+                        (${restaurant.logoUrl.startsWith('/images/')} ? ${restaurant.logoUrl} : 
+                         (${restaurant.logoUrl.contains('/')} ? ${restaurant.logoUrl} : '/images/logo/' + ${restaurant.logoUrl})))"
              alt="Logo"
              style="width:120px; height:120px; object-fit:cover; border-radius:8px;"
              class="me-3">
