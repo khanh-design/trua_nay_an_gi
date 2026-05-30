@@ -135,11 +135,41 @@ public class PaymentController {
                 totalPrice += item.getDish().getPrice() * item.getQuantity();
             }
 
+            // --- Tính toán mã giảm giá (Coupon) từ session VNPay ---
+            String appliedCoupon = (String) session.getAttribute("vnpay_appliedCoupon");
+            com.codegym.project_module_5.model.restaurant_model.Coupon coupon = null;
+            double discount = 0;
+            if (appliedCoupon != null && !appliedCoupon.isBlank()) {
+                try {
+                    var coupons = restaurantService.getCouponsByRestaurantId(restaurantId);
+                    var matched = coupons.stream()
+                            .filter(c -> Boolean.TRUE.equals(c.getIsAvailable()))
+                            .filter(c -> c.getName() != null && c.getName().equalsIgnoreCase(appliedCoupon.trim()))
+                            .findFirst();
+                    if (matched.isPresent()) {
+                        coupon = matched.get();
+                        boolean minOk = coupon.getMinOrder() == null || totalPrice >= coupon.getMinOrder();
+                        if (minOk) {
+                            double d = 0;
+                            if (coupon.getFixedDiscount() != null) d += coupon.getFixedDiscount();
+                            if (coupon.getPercentDiscount() != null) d += totalPrice * (coupon.getPercentDiscount() / 100.0);
+                            if (coupon.getMaxDiscount() != null) d = Math.min(d, coupon.getMaxDiscount());
+                            discount = Math.max(0, Math.min(d, totalPrice));
+                        }
+                    }
+                } catch (Exception e) {
+                    // Bỏ qua lỗi
+                }
+            }
+
+            double serviceFee = Math.round(totalPrice * 0.05);
+
             Orders order = new Orders();
             order.setUser(currentUser);
             order.setRestaurant(restaurantOpt.get());
             order.setOrderStatus(status);
-            order.setTotalPrice(totalPrice);
+            order.setCoupon(coupon); // Gán coupon cho order
+            order.setTotalPrice(Math.max(0, totalPrice - discount) + serviceFee); // totalPrice = subtotal - discount + serviceFee
             order.setAddress(address);
             order.setShipper(shipperOpt.get());
             order.setCustomerNote(note);
@@ -203,6 +233,7 @@ public class PaymentController {
         session.removeAttribute("vnpay_address");
         session.removeAttribute("vnpay_shipperId");
         session.removeAttribute("vnpay_note");
+        session.removeAttribute("vnpay_appliedCoupon");
         session.removeAttribute("vnpay_txnRef");
         session.removeAttribute("paymentMethod");
         session.removeAttribute("orderNote");
