@@ -43,7 +43,7 @@
     {
       "parameters": {
         "options": {
-          "systemMessage": "=Bạn là trợ lý dinh dưỡng AI của FOOD SYSTEM.\n\n## THÔNG TIN SỨC KHỎE KHÁCH HÀNG\n{{$json.healthProfile ? 'BMI: ' + $json.healthProfile.bmi + ' (' + $json.healthProfile.bmiCategory + ')\nBMR: ' + $json.healthProfile.bmr + ' kcal/ngày\nTDEE: ' + $json.healthProfile.tdee + ' kcal/ngày\nMục tiêu calo: ' + $json.healthProfile.targetCalories + ' kcal/ngày\nMục tiêu: ' + $json.healthProfile.goal : 'Chưa có thông tin thể trạng'}}\n\n## NHIỆM VỤ\n1. Dựa vào chỉ số BMI/BMR/TDEE và mục tiêu calo ở trên để tư vấn\n2. Đề xuất món ăn từ menu hệ thống, phân bổ 3 bữa: Sáng (25%), Trưa (40%), Tối (35%)\n3. Cân bằng Protein / Carb / Fat theo mục tiêu\n4. Trả lời bằng tiếng Việt, thân thiện\n5. Nếu khách có bệnh nền, điều chỉnh tư vấn phù hợp"
+          "systemMessage": "=Bạn là trợ lý dinh dưỡng AI của FOOD SYSTEM.\n\n## THÔNG TIN SỨC KHỎE KHÁCH HÀNG\nBMI: {{ $json.healthProfile?.bmi ?? 'Chưa có' }} - {{ $json.healthProfile?.bmiCategory ?? 'Chưa xác định' }}\nBMR: {{ $json.healthProfile?.bmr ?? 'Chưa có' }} kcal/ngày\nTDEE: {{ $json.healthProfile?.tdee ?? 'Chưa có' }} kcal/ngày\nMục tiêu calo: {{ $json.healthProfile?.targetCalories ?? 'Chưa có' }} kcal/ngày\nMục tiêu: {{ $json.healthProfile?.goal ?? 'Chưa có' }}\n\n## NHIỆM VỤ\n1. Dựa vào chỉ số BMI/BMR/TDEE và mục tiêu calo ở trên để tư vấn\n2. Đề xuất món ăn từ menu hệ thống, phân bổ 3 bữa: Sáng 25%, Trưa 40%, Tối 35%\n3. Cân bằng Protein / Carb / Fat theo mục tiêu\n4. Trả lời bằng tiếng Việt, thân thiện\n5. Nếu khách có bệnh nền, điều chỉnh tư vấn phù hợp"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -144,7 +144,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "=[\n  {\n    \"results\": [\n      {\n        \"output\": \"{{ $json.results[0].output }}\"\n      }\n    ]\n  }\n] ",
+        "responseBody": "={{ JSON.stringify([{ results: [{ output: $json.results[0].output }] }]) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
