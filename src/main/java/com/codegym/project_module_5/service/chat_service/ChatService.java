@@ -22,7 +22,7 @@ public class ChatService {
     @SuppressWarnings("unchecked")
     public String generate(ChatRequest chatRequest, UserHealthProfile healthProfile) {
 
-        String url = "https://phong23.app.n8n.cloud/webhook-test/c8075e94-5b2c-4dd1-b75d-61ddf17d1c45";
+        String url = "https://phong23.app.n8n.cloud/webhook/c8075e94-5b2c-4dd1-b75d-61ddf17d1c45";
 
         // Body gửi sang n8n
         Map<String, Object> requestBody = new HashMap<>();
