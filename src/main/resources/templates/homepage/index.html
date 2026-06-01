@@ -964,6 +964,9 @@
         Trực tuyến &bull; Phản hồi ngay
       </div>
     </div>
+    <button class="cb-close-btn" id="cb-stats-btn" aria-label="Xem chỉ số sức khỏe" title="Xem chỉ số BMI/BMR/TDEE" style="display:none;">
+      <i class="fas fa-chart-bar"></i>
+    </button>
     <button class="cb-close-btn" id="cb-close-btn" aria-label="Đóng chat">
       <i class="fas fa-times"></i>
     </button>
@@ -1068,6 +1071,11 @@
             style="width:100%;padding:8px;background:#ee4d2d;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;">
       <i class="fas fa-comments" style="margin-right:4px;"></i>Bắt đầu tư vấn món ăn
     </button>
+    <button id="back-to-chat-btn"
+            style="display:none;width:100%;padding:8px;background:transparent;color:#667eea;border:1.5px solid #667eea;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;margin-top:6px;transition:background .2s,color .2s;"
+            onmouseover="this.style.background='#667eea';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#667eea'">
+      <i class="fas fa-arrow-left" style="margin-right:4px;"></i>Quay lại chat
+    </button>
   </div>
 
   <!-- Messages -->
@@ -1099,6 +1107,8 @@
   const healthFormBox    = document.getElementById('health-form-container');
   const healthResults    = document.getElementById('health-results');
   const startChatBtn     = document.getElementById('start-chat-btn');
+  const backToChatBtn    = document.getElementById('back-to-chat-btn');
+  const cbStatsBtn       = document.getElementById('cb-stats-btn');
   const cbInputContainer = document.getElementById('cb-input-container');
 
   // ===== SESSION STORAGE KEYS =====
@@ -1133,6 +1143,7 @@
       healthResults.style.display = 'none';
       cbWindow.style.display = 'block';
       cbInputContainer.style.display = 'flex';
+      cbStatsBtn.style.display = 'flex';
       // Clear DOM trước khi restore tránh trùng lặp
       cbWindow.innerHTML = '';
       // Restore messages
@@ -1143,6 +1154,10 @@
       healthResults.style.display = 'block';
       cbWindow.style.display = 'none';
       cbInputContainer.style.display = 'none';
+      cbStatsBtn.style.display = 'none';
+      // Show back-to-chat button if there are messages
+      startChatBtn.style.display = chatMessages.length > 0 ? 'none' : 'block';
+      backToChatBtn.style.display = chatMessages.length > 0 ? 'block' : 'none';
       // Restore health results
       document.getElementById('res-bmi').textContent = savedHealth.bmi;
       document.getElementById('res-bmi-cat').textContent = savedHealth.bmiCategory;
@@ -1153,6 +1168,7 @@
       healthFormBox.style.display = 'block';
       cbWindow.style.display = 'none';
       cbInputContainer.style.display = 'none';
+      cbStatsBtn.style.display = 'none';
     }
   }
 
@@ -1206,8 +1222,16 @@
         healthResults.style.display = 'block';
         healthProfileSaved = true;
 
-        // Lưu vào sessionStorage
-        saveHealth(data);
+        // Lưu vào sessionStorage — merge cả dữ liệu form lẫn kết quả tính toán
+        saveHealth({
+          ...data,
+          weight:        payload.weight,
+          height:        payload.height,
+          age:           payload.age,
+          gender:        payload.gender,
+          activityLevel: payload.activityLevel,
+          goal:          payload.goal
+        });
         setChatMode('results');
       } else {
         alert('Lỗi: ' + (data.error || 'Không xác định'));
@@ -1221,10 +1245,11 @@
   });
 
   // ===== START CHAT =====
-  startChatBtn.addEventListener('click', function() {
+  function switchToChat() {
     healthResults.style.display = 'none';
     cbWindow.style.display = 'block';
     cbInputContainer.style.display = 'flex';
+    cbStatsBtn.style.display = 'flex';
     setChatMode('chat');
 
     // Chỉ thêm welcome nếu chưa có message
@@ -1232,6 +1257,27 @@
       addMessage('welcome', 'Chỉ số của bạn đã được ghi nhận! Hãy hỏi tôi về chế độ ăn phù hợp, ví dụ: "Gợi ý thực đơn 3 bữa hôm nay"');
     }
     setTimeout(() => cbInput.focus(), 100);
+  }
+  startChatBtn.addEventListener('click', switchToChat);
+  backToChatBtn.addEventListener('click', switchToChat);
+
+  // ===== VIEW HEALTH STATS FROM CHAT =====
+  cbStatsBtn.addEventListener('click', function() {
+    if (!savedHealth) return;
+    cbWindow.style.display = 'none';
+    cbInputContainer.style.display = 'none';
+    healthResults.style.display = 'block';
+    cbStatsBtn.style.display = 'none';
+    // Show back button, hide start button
+    startChatBtn.style.display = 'none';
+    backToChatBtn.style.display = 'block';
+    setChatMode('results');
+    // Restore health results values
+    document.getElementById('res-bmi').textContent = savedHealth.bmi;
+    document.getElementById('res-bmi-cat').textContent = savedHealth.bmiCategory;
+    document.getElementById('res-bmr').textContent = Math.round(savedHealth.bmr);
+    document.getElementById('res-tdee').textContent = Math.round(savedHealth.tdee);
+    document.getElementById('res-target').textContent = Math.round(savedHealth.targetCalories);
   });
 
   // ===== MESSAGE FUNCTIONS =====
@@ -1305,8 +1351,19 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           request:  text,
-          goal:     document.getElementById('hf-goal')?.value || savedHealth?.hp_goal || 'maintain',
-          diseases: []
+          goal:     savedHealth?.goal || document.getElementById('hf-goal')?.value || 'maintain',
+          diseases: [],
+          // Gửi kèm health profile để backend không phụ thuộc session
+          weight:       savedHealth?.weight       || null,
+          height:       savedHealth?.height       || null,
+          age:          savedHealth?.age          || null,
+          gender:       savedHealth?.gender       || null,
+          activityLevel: savedHealth?.activityLevel || null,
+          bmi:          savedHealth?.bmi          || null,
+          bmr:          savedHealth?.bmr          || null,
+          tdee:         savedHealth?.tdee         || null,
+          targetCalories: savedHealth?.targetCalories || null,
+          bmiCategory:  savedHealth?.bmiCategory  || null
         })
       });
       removeTyping();

@@ -25,8 +25,8 @@ public class ChatController {
     private final IUserRepository userRepo;
 
     public ChatController(ChatService chatService,
-                          IUserHealthProfileRepository healthProfileRepo,
-                          IUserRepository userRepo) {
+            IUserHealthProfileRepository healthProfileRepo,
+            IUserRepository userRepo) {
         this.chatService = chatService;
         this.healthProfileRepo = healthProfileRepo;
         this.userRepo = userRepo;
@@ -45,8 +45,7 @@ public class ChatController {
     public ResponseEntity<Map<String, Object>> saveHealthProfile(
             @RequestBody ChatRequest chatRequest,
             Principal principal,
-            HttpSession session
-    ) {
+            HttpSession session) {
         try {
             UserHealthProfile profile = new UserHealthProfile();
             profile.setWeight(chatRequest.getWeight());
@@ -76,8 +75,7 @@ public class ChatController {
                     "bmr", profile.getBmr(),
                     "tdee", profile.getTdee(),
                     "targetCalories", profile.getTargetCalories(),
-                    "bmiCategory", profile.getBmiCategory()
-            ));
+                    "bmiCategory", profile.getBmiCategory()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(Map.of("success", false, "error", e.getMessage()));
@@ -89,8 +87,7 @@ public class ChatController {
     @ResponseBody
     public ResponseEntity<Map<String, String>> sendMessage(
             @RequestBody ChatRequest chatRequest,
-            HttpSession session
-    ) {
+            HttpSession session) {
         try {
             String userId = (String) session.getAttribute("userId");
             if (userId == null) {
@@ -104,6 +101,24 @@ public class ChatController {
             UserHealthProfile healthProfile =
                     (UserHealthProfile) session.getAttribute("healthProfile");
 
+            // Nếu session hết hạn (vd: server restart), rebuild từ dữ liệu frontend gửi lên
+            if (healthProfile == null && chatRequest.getBmi() != null) {
+                healthProfile = new UserHealthProfile();
+                healthProfile.setWeight(chatRequest.getWeight());
+                healthProfile.setHeight(chatRequest.getHeight());
+                healthProfile.setAge(chatRequest.getAge());
+                healthProfile.setGender(chatRequest.getGender());
+                healthProfile.setActivityLevel(chatRequest.getActivityLevel());
+                healthProfile.setGoal(chatRequest.getGoal());
+                healthProfile.setBmi(chatRequest.getBmi());
+                healthProfile.setBmr(chatRequest.getBmr());
+                healthProfile.setTdee(chatRequest.getTdee());
+                healthProfile.setTargetCalories(chatRequest.getTargetCalories());
+                healthProfile.setBmiCategory(chatRequest.getBmiCategory());
+                // Lưu lại vào session để lần sau không cần rebuild
+                session.setAttribute("healthProfile", healthProfile);
+            }
+
             String response = chatService.generate(chatRequest, healthProfile);
 
             return ResponseEntity.ok(Map.of("response", response));
@@ -114,4 +129,4 @@ public class ChatController {
                     .body(Map.of("error", "Không thể xử lý yêu cầu: " + e.getMessage()));
         }
     }
-}
+}

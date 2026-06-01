@@ -15,11 +15,18 @@ public class ChatRequest {
     private List<String> diseases;
     private String userId;
 
-    // Health profile fields
+    // Health profile fields (input)
     private Double weight;         // kg
     private Double height;         // cm
     private Integer age;
     private String gender;         // "male" / "female"
     private String activityLevel;  // sedentary, light, moderate, active, very_active
+
+    // Computed health metrics (sent from frontend sessionStorage)
+    private Double bmi;
+    private Double bmr;
+    private Double tdee;
+    private Double targetCalories;
+    private String bmiCategory;
 }
 

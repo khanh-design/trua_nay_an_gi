@@ -26,8 +26,53 @@ public class ChatService {
 
         // Body gửi sang n8n
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("message", chatRequest.getRequest());
-        requestBody.put("goal", chatRequest.getGoal());
+
+        // === Xây dựng enriched message với context sức khỏe ===
+        // Ưu tiên: healthProfile (session) > chatRequest fields (frontend gửi kèm)
+        Double  bmi           = healthProfile != null ? healthProfile.getBmi()           : chatRequest.getBmi();
+        Double  bmr           = healthProfile != null ? healthProfile.getBmr()           : chatRequest.getBmr();
+        Double  tdee          = healthProfile != null ? healthProfile.getTdee()          : chatRequest.getTdee();
+        Double  targetCal     = healthProfile != null ? healthProfile.getTargetCalories(): chatRequest.getTargetCalories();
+        String  bmiCategory   = healthProfile != null ? healthProfile.getBmiCategory()  : chatRequest.getBmiCategory();
+        String  goal          = healthProfile != null && healthProfile.getGoal() != null
+                                    ? healthProfile.getGoal()
+                                    : (chatRequest.getGoal() != null ? chatRequest.getGoal() : "maintain");
+        Double  weight        = healthProfile != null ? healthProfile.getWeight()        : chatRequest.getWeight();
+        Double  height        = healthProfile != null ? healthProfile.getHeight()        : chatRequest.getHeight();
+        Integer age           = healthProfile != null ? healthProfile.getAge()           : chatRequest.getAge();
+        String  gender        = healthProfile != null ? healthProfile.getGender()        : chatRequest.getGender();
+
+        String enrichedMessage = chatRequest.getRequest();
+        // Chỉ nhúng context nếu có ít nhất chỉ số quan trọng (BMI hoặc TDEE)
+        if (bmi != null || tdee != null) {
+            StringBuilder ctx = new StringBuilder("[Thông tin sức khỏe người dùng:");
+            if (weight  != null) ctx.append(" Cân nặng=").append(String.format("%.1f", weight)).append("kg,");
+            if (height  != null) ctx.append(" Chiều cao=").append(String.format("%.0f", height)).append("cm,");
+            if (age     != null) ctx.append(" Tuổi=").append(age).append(",");
+            if (gender  != null) ctx.append(" Giới tính=").append("male".equals(gender) ? "Nam" : "Nữ").append(",");
+            if (bmi     != null) ctx.append(" BMI=").append(String.format("%.1f", bmi));
+            if (bmiCategory != null) ctx.append(" (").append(bmiCategory).append(")");
+            ctx.append(",");
+            if (bmr     != null) ctx.append(" BMR=").append(Math.round(bmr)).append(" kcal,");
+            if (tdee    != null) ctx.append(" TDEE=").append(Math.round(tdee)).append(" kcal,");
+            if (targetCal != null) ctx.append(" Mục tiêu calo=").append(Math.round(targetCal)).append(" kcal/ngày,");
+            ctx.append(" Mục tiêu=").append(goal).append("]");
+            enrichedMessage = ctx.toString() + "\n\n" + chatRequest.getRequest();
+        }
+
+        // === DEBUG: log để kiểm tra dữ liệu ===
+        System.out.println("=== CHAT DEBUG ===");
+        System.out.println("healthProfile from session: " + (healthProfile != null ? "FOUND" : "NULL"));
+        System.out.println("chatRequest.getBmi(): " + chatRequest.getBmi());
+        System.out.println("chatRequest.getTdee(): " + chatRequest.getTdee());
+        System.out.println("chatRequest.getGoal(): " + chatRequest.getGoal());
+        System.out.println("bmi resolved: " + bmi);
+        System.out.println("tdee resolved: " + tdee);
+        System.out.println("enrichedMessage:\n" + enrichedMessage);
+        System.out.println("==================");
+
+        requestBody.put("message", enrichedMessage);
+        requestBody.put("goal", goal);
         requestBody.put("diseases", chatRequest.getDiseases());
         requestBody.put("userId", chatRequest.getUserId());
 
